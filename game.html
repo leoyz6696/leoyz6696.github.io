@@ -1,0 +1,1079 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>内耗情绪具象化</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@600;900&display=swap" rel="stylesheet" />
+    <style>
+      :root{
+        --ink:#ece7dd;
+        --ink-dim:#9a958a;
+        --bg:#0c0c0e;
+        --panel:#16161a;
+        --line:#2a2a30;
+        --red:#e5484d;
+        --red-deep:#8f1d22;
+        --calm-bg:#f4f1ea;
+        --calm-ink:#1d1c19;
+        --calm-dim:#6f6a5f;
+        --calm-line:#ddd6c8;
+      }
+      @media (prefers-color-scheme: light){
+        :root{
+          --ink:#201e1a;
+          --ink-dim:#6f6a5f;
+          --bg:#f4f1ea;
+          --panel:#fffdf8;
+          --line:#ddd6c8;
+        }
+      }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --calm-bg:#141417;
+          --calm-ink:#ece7dd;
+          --calm-dim:#9a958a;
+          --calm-line:#2a2a30;
+        }
+      }
+      *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+      html,body{ height:100%; }
+      body{
+        margin:0;
+        background:var(--bg);
+        color:var(--ink);
+        font-family:"Noto Sans SC", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+        overflow-x:hidden;
+      }
+      button{ font-family:inherit; cursor:pointer; }
+      input{ font-family:inherit; }
+
+      .view{ display:none; min-height:100dvh; }
+      .view.on{ display:block; }
+
+      /* ---------- 入口 ---------- */
+      #view-intro{
+        padding:max(28px, env(safe-area-inset-top)) 22px calc(28px + env(safe-area-inset-bottom));
+        max-width:640px; margin:0 auto;
+        display:none; flex-direction:column;
+      }
+      #view-intro.on{ display:flex; }
+      .intro-top{ margin-top:6vh; }
+      .intro-title{
+        font-family:"Noto Serif SC", serif; font-weight:900;
+        font-size:clamp(56px, 17vw, 96px); line-height:1.05; letter-spacing:.04em;
+        margin:0;
+      }
+      .intro-title .thin{ color:var(--red); }
+      .intro-sub{
+        margin:18px 0 0; font-size:15px; line-height:1.9; color:var(--ink-dim); max-width:30em;
+      }
+      .intro-sub strong{ color:var(--ink); font-weight:700; }
+      .field-label{ margin:44px 0 10px; font-size:13px; letter-spacing:.18em; color:var(--ink-dim); }
+      #thought{
+        width:100%; padding:16px 4px; font-size:19px; color:var(--ink);
+        background:transparent; border:0; border-bottom:2px solid var(--line);
+        outline:none; border-radius:0;
+      }
+      #thought:focus{ border-bottom-color:var(--red); }
+      #thought::placeholder{ color:var(--ink-dim); opacity:.6; }
+      .chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+      .chip{
+        border:1px solid var(--line); background:var(--panel); color:var(--ink);
+        padding:8px 14px; border-radius:999px; font-size:14px;
+      }
+      .chip:active{ border-color:var(--red); color:var(--red); }
+      #startBtn{
+        margin-top:40px; width:100%; padding:17px;
+        background:var(--ink); color:var(--bg); border:0; border-radius:10px;
+        font-size:17px; font-weight:700; letter-spacing:.12em;
+      }
+      #startBtn:active{ transform:scale(.985); }
+      .intro-note{
+        margin-top:auto; padding-top:36px; font-size:12.5px; line-height:1.8; color:var(--ink-dim);
+      }
+
+      /* ---------- 轰炸 ---------- */
+      #view-flood{
+        position:fixed; inset:0; overflow:hidden; background:#08080a; color:#ece7dd;
+        display:none;
+      }
+      #view-flood.on{ display:block; }
+      #shakeWrap{ position:absolute; inset:-14px; will-change:transform; }
+      .scanlines{
+        position:absolute; inset:0; pointer-events:none; z-index:40; opacity:.5;
+        background:repeating-linear-gradient(0deg, rgba(255,255,255,.028) 0 1px, transparent 1px 3px);
+      }
+      .vignette{
+        position:absolute; inset:0; pointer-events:none; z-index:41;
+        background:radial-gradient(ellipse at center, transparent 52%, rgba(0,0,0,.55) 100%);
+      }
+      #redPulse{
+        position:absolute; inset:0; pointer-events:none; z-index:39; opacity:0;
+        background:radial-gradient(ellipse at center, transparent 40%, rgba(229,72,77,.28) 100%);
+        transition:opacity .5s;
+      }
+      .flood-head{
+        position:relative; z-index:30; display:flex; align-items:center; gap:14px;
+        padding:calc(12px + env(safe-area-inset-top)) 16px 10px;
+        border-bottom:1px solid #26262c; background:rgba(8,8,10,.82); backdrop-filter:blur(4px);
+      }
+      .flood-head .who{ min-width:0; }
+      .flood-head .name{ font-size:15px; font-weight:700; white-space:nowrap; }
+      .flood-head .status{ font-size:11.5px; color:#e5484d; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .head-stats{ margin-left:auto; text-align:right; font-variant-numeric:tabular-nums; flex:none; }
+      .head-stats .t{ font-size:15px; font-weight:700; }
+      .head-stats .c{ font-size:11.5px; color:#9a958a; margin-top:2px; }
+      .head-stats .c b{ color:#e5484d; font-weight:700; }
+      #phaseTag{
+        flex:none; font-size:11px; letter-spacing:.14em; padding:5px 9px;
+        border:1px solid #3a3a42; border-radius:999px; color:#c9c4b8;
+      }
+      #soundBtn{
+        flex:none; width:36px; height:36px; border-radius:50%;
+        border:1px solid #3a3a42; background:transparent; color:#c9c4b8; font-size:16px; line-height:1;
+      }
+      #stream{
+        position:relative; z-index:10; height:calc(100% - 64px);
+        overflow:hidden; padding:16px 14px 130px;
+        display:flex; flex-direction:column; justify-content:flex-end; gap:9px;
+        mask-image:linear-gradient(180deg, transparent 0, #000 70px);
+        -webkit-mask-image:linear-gradient(180deg, transparent 0, #000 70px);
+      }
+      .bubble{
+        max-width:86%; padding:9px 13px; border-radius:4px 14px 14px 14px;
+        background:#1b1b20; border:1px solid #2c2c33;
+        font-size:15px; line-height:1.55; color:#e8e3d8;
+        animation:pop .18s ease-out;
+        align-self:flex-start;
+      }
+      .bubble .voice{ display:block; font-size:10.5px; letter-spacing:.12em; margin-bottom:3px; }
+      .v-q{ color:#f0767c; } .v-c{ color:#e8a33d; } .v-e{ color:#7fb2e5; }
+      .v-p{ color:#b18fe0; } .v-s{ color:#8fd48a; }
+      .bubble.mine{
+        align-self:center; max-width:92%; text-align:center;
+        background:#26221a; border-color:#4a4230; color:#f0e6cd;
+        border-radius:14px; font-size:16px;
+      }
+      .bubble.mine .voice{ color:#c9a959; }
+      .bubble.hot{ border-color:var(--red-deep); background:#241114; }
+      .bubble.boom{
+        border-color:#ff2b31; background:#3a0d10; color:#ffe9e4;
+        font-size:19px; font-weight:700; position:relative; z-index:6;
+        box-shadow:0 0 26px rgba(229,72,77,.6);
+        animation:pop .18s ease-out, boomShake .55s ease-out;
+      }
+      @keyframes boomShake{
+        0%{ transform:scale(1); }
+        14%{ transform:scale(1.24) rotate(-1.8deg); }
+        28%{ transform:scale(1.13) rotate(1.5deg) translateX(-5px); }
+        42%{ transform:scale(1.19) rotate(-1.1deg) translateX(5px); }
+        60%{ transform:scale(1.07) rotate(.6deg); }
+        78%{ transform:scale(1.02); }
+        100%{ transform:scale(1); }
+      }
+      .burst-p{
+        position:absolute; z-index:37; pointer-events:none; line-height:1;
+        animation:burstFly .72s cubic-bezier(.17,.67,.35,1) forwards;
+      }
+      @keyframes burstFly{
+        0%{ transform:translate(-50%,-50%) scale(.5); opacity:1; }
+        100%{ transform:translate(calc(-50% + var(--bx)), calc(-50% + var(--by))) scale(1.6) rotate(var(--br)); opacity:0; }
+      }
+      .boom-flash{
+        position:absolute; inset:0; pointer-events:none;
+        background:radial-gradient(ellipse at center, rgba(229,72,77,.34) 0%, transparent 65%);
+        animation:boomFlash .38s ease-out forwards;
+      }
+      @keyframes boomFlash{ from{ opacity:1; } to{ opacity:0; } }
+      .barrage.boom-b{ color:#ff3138; text-shadow:0 0 22px rgba(255,43,49,.95), 0 2px 0 rgba(0,0,0,.7); }
+      @keyframes pop{ from{ transform:translate(-18px, 6px) scale(.96); opacity:0; } to{ transform:none; opacity:1; } }
+      .barrage{
+        position:absolute; z-index:20; white-space:nowrap; pointer-events:none;
+        font-weight:900; color:#f2ede2; text-shadow:0 0 14px rgba(229,72,77,.65), 0 2px 0 rgba(0,0,0,.6);
+        animation:fly linear forwards;
+      }
+      .barrage.red{ color:#ff5b61; }
+      @keyframes fly{
+        0%{ transform:translateX(var(--fx0, 105vw)); opacity:0; }
+        10%{ opacity:var(--fo, 1); }
+        88%{ opacity:var(--fo, 1); }
+        100%{ transform:translateX(var(--fx1, -130%)); opacity:0; }
+      }
+      #floodWall{
+        position:absolute; inset:-30px; z-index:5; pointer-events:none;
+        display:none; overflow:hidden; opacity:.17;
+      }
+      #view-flood.p5 #floodWall{ display:block; }
+      #floodWall .row{
+        white-space:nowrap; font-weight:900; color:#e5484d; line-height:1.45;
+        animation:wallMove linear infinite alternate;
+      }
+      #floodWall .row:nth-child(even){ color:#f2ede2; animation-direction:alternate-reverse; }
+      @keyframes wallMove{ from{ transform:translateX(-5%); } to{ transform:translateX(1%); } }
+      #thoughtEcho{
+        position:absolute; left:14px; z-index:26; pointer-events:none;
+        top:calc(88px + env(safe-area-inset-top));
+        max-width:min(78vw, 420px);
+        background:rgba(14,14,17,.72); border:1px solid #33323a; border-radius:10px;
+        padding:7px 12px 8px;
+      }
+      #thoughtEcho .lab{ display:block; font-size:10px; letter-spacing:.16em; color:#9a958a; margin-bottom:2px; }
+      #thoughtEcho .txt{
+        display:block; font-size:14.5px; font-weight:700; color:#f0e6cd; line-height:1.45;
+        transition:filter 1.6s ease, opacity 1.6s ease;
+      }
+      #flashLayer{ position:absolute; inset:0; z-index:35; pointer-events:none; }
+      .flash-word{
+        position:absolute; transform:translate(-50%,-50%); text-align:center; width:94vw;
+        animation:flashFade .95s ease-out forwards;
+      }
+      .flash-word span{
+        display:inline-block; font-family:"Noto Serif SC", serif; font-weight:900; letter-spacing:.05em;
+        color:#ff4d52; text-shadow:0 0 34px rgba(229,72,77,.8);
+        animation:flashPop .95s ease-out forwards;
+      }
+      .flash-word.self span{ color:#ffeec2; text-shadow:0 0 30px rgba(230,190,90,.55), 0 2px 0 rgba(0,0,0,.55); }
+      .flash-word.forget span{ color:#cfc9ba; text-shadow:0 0 26px rgba(200,195,180,.4), 0 2px 0 rgba(0,0,0,.6); }
+      @keyframes flashFade{ 0%{ opacity:0; } 12%{ opacity:1; } 72%{ opacity:1; } 100%{ opacity:0; } }
+      @keyframes flashPop{
+        0%{ transform:scale(.78); } 12%{ transform:scale(1.07); }
+        30%{ transform:scale(1); } 100%{ transform:scale(1.03); }
+      }
+      .notif{
+        position:absolute; left:10px; right:10px; z-index:45;
+        background:rgba(28,28,34,.96); border:1px solid #3d3d46; border-radius:14px;
+        padding:11px 14px; display:flex; gap:10px; align-items:flex-start;
+        animation:notifIn .3s ease-out;
+        box-shadow:0 12px 32px rgba(0,0,0,.5);
+      }
+      .notif .app{ font-size:10.5px; letter-spacing:.14em; color:#9a958a; }
+      .notif .msg{ font-size:14px; line-height:1.5; color:#f0ebdf; margin-top:2px; }
+      .notif .dot{ flex:none; width:9px; height:9px; border-radius:50%; background:var(--red); margin-top:5px; }
+      @keyframes notifIn{ from{ transform:translateY(-130%); } to{ transform:none; } }
+      .notif.out{ transition:transform .35s, opacity .35s; transform:translateY(-130%); opacity:0; }
+      #exitDock{
+        position:absolute; z-index:60; right:16px;
+        bottom:calc(18px + env(safe-area-inset-bottom));
+        display:flex; flex-direction:column; align-items:flex-end; gap:8px;
+      }
+      #exitHint{
+        font-size:12px; color:#b9b3a6; background:rgba(12,12,14,.75);
+        padding:6px 10px; border-radius:8px; opacity:0; transition:opacity 1.2s; max-width:230px; text-align:right; line-height:1.6;
+      }
+      #exitHint.show{ opacity:1; }
+      #exitBtn{
+        border:1px solid #57534a; background:rgba(16,16,19,.9); color:#f2ede2;
+        padding:13px 20px; border-radius:999px; font-size:15px; font-weight:700; letter-spacing:.1em;
+        box-shadow:0 8px 24px rgba(0,0,0,.45);
+      }
+      #exitBtn:active{ background:#f2ede2; color:#101013; }
+
+      /* ---------- 平静 ---------- */
+      #view-calm{
+        background:var(--calm-bg); color:var(--calm-ink);
+        padding:max(30px, env(safe-area-inset-top)) 22px calc(30px + env(safe-area-inset-bottom));
+      }
+      .calm-inner{ max-width:640px; margin:0 auto; }
+      .calm-stop{
+        font-family:"Noto Serif SC", serif; font-weight:900;
+        font-size:clamp(44px, 13vw, 72px); margin:5vh 0 8px; line-height:1.15;
+      }
+      .calm-lede{ font-size:15px; color:var(--calm-dim); line-height:1.9; margin:0 0 34px; }
+      .calm-lines{ font-size:17.5px; line-height:2.15; }
+      .calm-lines p{ margin:0 0 6px; }
+      .calm-lines .dim{ color:var(--calm-dim); }
+      .calm-lines .key{ font-weight:900; }
+      .stats{
+        display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin:40px 0 8px;
+      }
+      .stat{ border:1px solid var(--calm-line); border-radius:12px; padding:14px 10px; text-align:center; }
+      .stat .num{ font-size:26px; font-weight:900; font-variant-numeric:tabular-nums; }
+      .stat .lab{ font-size:11.5px; color:var(--calm-dim); letter-spacing:.12em; margin-top:4px; }
+      .stats-note{ font-size:12.5px; color:var(--calm-dim); line-height:1.8; margin:10px 2px 0; }
+      .calm-actions{ display:flex; gap:10px; margin-top:36px; flex-wrap:wrap; }
+      #againBtn{
+        flex:1; min-width:150px; padding:15px; border-radius:10px; border:0;
+        background:var(--calm-ink); color:var(--calm-bg); font-size:16px; font-weight:700; letter-spacing:.08em;
+      }
+      #doneBtn{
+        flex:1; min-width:150px; padding:15px; border-radius:10px;
+        background:transparent; color:var(--calm-ink); border:1px solid var(--calm-line);
+        font-size:16px; font-weight:500;
+      }
+      #byeMsg{
+        display:none; margin-top:36px; font-family:"Noto Serif SC", serif;
+        font-size:21px; line-height:1.9; font-weight:600;
+      }
+      #byeMsg.show{ display:block; }
+      @media (prefers-reduced-motion: reduce){
+        .bubble, .bubble.boom, .notif{ animation:none; }
+        .burst-p{ display:none; }
+        .flash-word, .flash-word span{ animation-duration:.2s; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- 入口 -->
+    <section class="view on" id="view-intro">
+      <div class="intro-top">
+        <h1 class="intro-title">内<span class="thin">耗</span></h1>
+        <p class="intro-sub">
+          内耗不是想得太多。是同一个念头，被一群声音围着，一遍一遍地反对。
+          它们吵得你没法思考，又刚好长在你<strong>躲不开的地方</strong>——你的脑子里。
+        </p>
+        <p class="intro-sub">
+          下面这个实验，把那些声音放到屏幕上。看看它们到底有多吵。
+          也看看，你什么时候会想起来：<strong>你随时可以走。</strong>
+        </p>
+        <p class="intro-sub">
+          当你在脑海里无可回避的时候，<strong>就把它们摆出来，感受一下。</strong>
+        </p>
+      </div>
+
+      <p class="field-label">写下一个反复纠缠你的念头——工作、爱情、关系，或者一个欲望</p>
+      <input id="thought" type="text" maxlength="30" placeholder="比如：我想辞职" autocomplete="off" />
+      <div class="chips" id="chips">
+        <button class="chip" type="button">我想辞职</button>
+        <button class="chip" type="button">他到底爱不爱我</button>
+        <button class="chip" type="button">我妈又催我相亲了</button>
+        <button class="chip" type="button">同事是不是在针对我</button>
+        <button class="chip" type="button">我想一夜暴富</button>
+        <button class="chip" type="button">我想瘦十斤</button>
+        <button class="chip" type="button">我想被所有人喜欢</button>
+        <button class="chip" type="button">我想躺平什么都不干</button>
+      </div>
+
+      <button id="startBtn" type="button">把这个念头放进脑子里</button>
+
+      <p class="intro-note">
+        鼓声会从一声一声开始，越敲越密，越敲越重，屏幕也会震。请把手机握稳，音量开大一点——声音会比你想的更响。<br />
+        iPhone 若开了侧边静音开关，声音会被系统吞掉——先关掉它，再开始。<br />
+        退出键从第一秒起就在——就像现实里一样，只是内耗时你常常看不见它。
+      </p>
+    </section>
+
+    <!-- 轰炸 -->
+    <section class="view" id="view-flood" aria-label="内耗模拟">
+      <div id="shakeWrap">
+        <div id="redPulse"></div>
+        <header class="flood-head">
+          <div class="who">
+            <div class="name">脑内 · 声音们</div>
+            <div class="status" id="floodStatus">正在输入……</div>
+          </div>
+          <span id="phaseTag">轻声质疑</span>
+          <button id="soundBtn" type="button" aria-label="开关声音" title="声音">🔇</button>
+          <div class="head-stats">
+            <div class="t" id="clock">00:00</div>
+            <div class="c">已承受 <b id="hitCount">0</b> 句</div>
+          </div>
+        </header>
+        <div id="thoughtEcho"><span class="lab" id="echoLabel">你最初的问题</span><span class="txt" id="echoText"></span></div>
+        <div id="stream"></div>
+        <div id="floodWall"></div>
+        <div id="barrageLayer"></div>
+        <div id="flashLayer"></div>
+        <div id="notifLayer"></div>
+        <div class="scanlines"></div>
+        <div class="vignette"></div>
+      </div>
+      <div id="exitDock">
+        <div id="exitHint">你发现了吗——这个键，从第一秒起就在这里。</div>
+        <button id="exitBtn" type="button">放下手机</button>
+      </div>
+    </section>
+
+    <!-- 平静 -->
+    <section class="view" id="view-calm">
+      <div class="calm-inner">
+        <h2 class="calm-stop">停了。</h2>
+        <p class="calm-lede">你刚才听见的每一句，都只响在这一块屏幕里。没有一句能跟你走出这个页面。</p>
+        <div class="calm-lines">
+          <p>内耗骗你的地方，其实只有一个——</p>
+          <p class="key">它让你以为，没有出口。</p>
+          <p>可出口一直都在。刚才，它就在你的右下角，安安静静，从第一秒起。</p>
+          <p class="dim">你不是被困住了。你只是盯着它们，盯得太久，忘了抬头。</p>
+          <p class="dim">还有吵到最后的那一幕——你连自己最初的问题，都快想不起来了。它们从来不回答问题，它们只是把问题吵到消失。</p>
+          <p>现实也一样。门在，路在，电话可以挂，场子可以散，人可以起身走掉。</p>
+          <p class="key">下一次脑子里开始刷屏的时候，记住：你不是没有退路，你只是忘了自己能走。</p>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><div class="num" id="statTime">0秒</div><div class="lab">你坚持了</div></div>
+          <div class="stat"><div class="num" id="statHits">0</div><div class="lab">句否定砸向你</div></div>
+          <div class="stat"><div class="num" id="statPhase">—</div><div class="lab">声音吵到</div></div>
+        </div>
+        <p class="stats-note">这些数字在现实里没有意义。声音再多，也只是一块屏幕的尺寸——你放下，它就没了。</p>
+
+        <div class="calm-actions">
+          <button id="againBtn" type="button">再放一个念头</button>
+          <button id="doneBtn" type="button">就到这里</button>
+        </div>
+        <p id="byeMsg">好。把手机放下吧。<br />外面的声音，没那么吵。</p>
+      </div>
+    </section>
+
+    <script>
+      (function(){
+        "use strict";
+        var $ = function(id){ return document.getElementById(id); };
+        var intro = $("view-intro"), flood = $("view-flood"), calm = $("view-calm");
+        var input = $("thought"), stream = $("stream"), barrageLayer = $("barrageLayer"),
+            floodWall = $("floodWall"),
+            notifLayer = $("notifLayer"), flashLayer = $("flashLayer"),
+            echoText = $("echoText"), echoLabel = $("echoLabel"), shakeWrap = $("shakeWrap"),
+            redPulse = $("redPulse"), clockEl = $("clock"), hitEl = $("hitCount"),
+            phaseTag = $("phaseTag"), statusEl = $("floodStatus"), hint = $("exitHint");
+
+        var VOICES = [
+          { cls:"v-q", name:"质疑" },
+          { cls:"v-c", name:"灾难预演" },
+          { cls:"v-e", name:"别人的目光" },
+          { cls:"v-p", name:"旧账" },
+          { cls:"v-s", name:"羞耻感" }
+        ];
+        var LINES = {
+          0:["你认真的？","再想想吧。","这事儿没那么简单。","你确定你想清楚了？","先别高兴得太早。","嗯……我看悬。","你每次都是三分钟热度。","等一下，你凭什么觉得可以？","你上次也是这么说的。","凭什么就是你？","这话说出口，你自己不心虚？","你连自己都说服不了。","别急着感动自己。","计划写得再漂亮，执行的人可是你。","你确定这不是在逃避？","想好了？——你哪次想好过。","先掂量掂量自己几斤几两。","冲动，纯纯的冲动。","这件事，你了解过超过十分钟吗？","又是拍脑袋的决定。"],
+          1:["你不行。","别闹了，你做不到的。","就你？算了吧。","你根本不是这块料。","别自欺欺人了。","你以为你是谁啊。","醒醒吧。","你连坚持都做不到，还谈什么。","放弃吧，不丢人——反正你也习惯了。","你努力的样子，只会显得更可笑。","你连早起都做不到。","专注五分钟，对你都是奢望。","你的自律，保质期只有三天。","说起来头头是道，做起来一塌糊涂。","想得比谁都多，做得比谁都少。","半途而废这件事，你倒是很专一。","你的行动力，还停在嘴上。","收藏了一百个教程，打开过几个？","你不是没时间，你是没种开始。","道理你都懂，就是做不到。"],
+          2:["万一失败了呢？","到时候收不了场怎么办？","钱花光了怎么办？","万一比现在还惨呢？","你想过最坏的结果吗？","出了事谁替你兜底？没有人。","一步错，步步错。","等着后悔吧。","你现在回头还来得及。","到时候哭都来不及。","万一钱不够呢？","万一身体先垮了呢？","最坏的情况，你敢想吗？","等你后悔，连退路都被人占了。","机会可不会等你准备好。","错过这一次，就没有下一次了。","万一家里人知道了呢？","到最后，两头落空。","你输得起吗？先算算。","一步走错，后面全是连锁反应。"],
+          3:["别人会怎么看你？","他们会在背后笑你的。","你家里人会失望的。","朋友们都等着看你笑话呢。","你这样很丢人，知道吗？","大家都觉得你不靠谱。","别让人看笑话了。","你一开口，场面就尴尬了。","他们客气，只是不想当面说。","你看看人家，再看看你。","同龄人早就把你甩开几条街了。","群里你一说话就冷场，你没发现？","你发的动态，没人点赞，也没人评论。","他们表面夸你，心里怎么想的，你猜不到？","你已经是饭桌上的笑话素材了。","过年回家，你敢报你的近况吗？","在他们眼里，你早就掉队了。","你的名字被提起时那个停顿，你品品。"],
+          4:["上次你就是这么搞砸的。","忘了上次多难堪了？","你哪次说到做到过？","前年的计划，现在还在原地。","你对自己说过多少次'明天开始'？","你的执行力，自己心里没数？","同样的坑，你还要跳几次？","你的人生就是一次次重播。","三年前立的旗，还在那儿立着，旗都烂了。","买的那些课，听完过一节吗？","健身卡办了大半年，去了几次？","你欠自己的账，一本都记不下。","每次都是'下次一定'，下次呢？","日记写了三天，第四天人呢？","收藏夹里躺着多少个'以后再看'。","上个月的今天，你说的话一模一样。","你食言的次数，先对自己数一遍。","那双跑鞋买回来，跑过吗？鞋底还是新的吧。"],
+          5:["你也配？","别做梦了。","认清自己吧。","这种好事轮不到你。","你就是这种命。","别挣扎了，越挣扎越难看。","普通人就该过普通的日子。","你的上限，早就到了。","就这点出息。","你看看你现在这副样子。","连这点小事都做不到，还谈什么以后。","你也就配想想了。","天亮了，梦该醒了。","别再给自己加戏了，没人看。","你不尴尬？反正我替你尴尬。","镜子里的那个人，你看着不陌生吗？","你的'差不多'，差的不是一点。","认命吧，有些人就是不行。"]
+        };
+        var BARRAGE = ["不行","算了","别想了","你配吗","万一呢","丢人","放弃吧","又来了","没用的","太晚了","别做梦","认命吧","你不行","笑话","完了","停下","别动","后悔","搞砸","就你？","心虚","装什么","别躲了","醒醒吧","嘴硬","你慌了","承认吧","何必呢","没救了","原地踏步","眼高手低","自欺欺人","半途而废","又拖延","想太多","强撑着","装没事","还不睡","丢人现眼","一事无成","白日做梦","认清现实","没出息","拖延症","逃避","就这？","不配","别演了","心虚吧","又怂了"];
+        var NOTIFS = [
+          { app:"脑内推送", msg:"你又想多了。" },
+          { app:"脑内推送", msg:"未读否定 ×99+，点开看看吧，反正你躲不掉。" },
+          { app:"回忆", msg:"三年前的今天，你也说过同样的话。后来呢？" },
+          { app:"脑内推送", msg:"提醒：你已经原地纠结很久了。" },
+          { app:"别人的目光", msg:"有人刚刚看了你一眼。什么意思，你自己想。" },
+          { app:"脑内推送", msg:"你的计划有一个新漏洞，点开查看（你已经在想了）。" },
+          { app:"脑内推送", msg:"你关注的人刚刚又往前走了一步。再看看你。" },
+          { app:"回忆", msg:"五年前你说错的那句话，到现在还记得清清楚楚。" },
+          { app:"账单提醒", msg:"本月又超支了。你的自控力，已欠费停机。" },
+          { app:"脑内推送", msg:"系统提示：借口库存充足，行动库存为零。" },
+          { app:"深夜电台", msg:"凌晨了。大家都睡了，只有你还醒着想这些。" },
+          { app:"别人的目光", msg:"刚才那个停顿，是不是在笑你？你自己品。" }
+        ];
+        /* 情境话术：按念头里的关键词命中，命中后在牌堆里出现两次，贴得更紧 */
+        var TOPICS = [
+          { keys:["辞职","工作","上班","同事","老板","领导","加班","工资","面试","升职","跳槽","公司","创业","失业"],
+            lines:[[1,"这份工作都干不好，还想干别的？"],[2,"辞了职，下个月的房租谁交？"],[3,"加班到最晚的是你，升职的却不是你。"],[4,"上次面试被刷，你忘了？"],[2,"裸辞一时爽，投简历火葬场。"],[3,"同事背后怎么议论你，你真想知道？"],[5,"三十多岁了，还在原地打转。"],[2,"老板那句'再考虑考虑'，你听不懂吗？"],[1,"你的不可替代性，到底在哪儿？"],[4,"这个月的目标，又没完成吧。"]] },
+          { keys:["爱","喜欢","分手","男朋友","女朋友","对象","暗恋","表白","暧昧","前任","他","她"],
+            lines:[[3,"对方不回消息，是忙，还是不想理你，你心里有数。"],[5,"你发的每条消息，都删了改、改了删。"],[1,"你爱的到底是这个人，还是你想象里的样子？"],[2,"主动久了，只会被当成理所当然。"],[3,"那条朋友圈，是不是分组可见，你想过吗？"],[5,"患得患失的样子，真的很难看。"],[2,"万一对方从来没认真过呢？"],[4,"上次的伤还没好，这次又往里跳。"],[1,"你在这段关系里，越来越不像你自己了。"],[3,"你得到的待遇，连普通朋友都不如。"]] },
+          { keys:["妈","爸","相亲","结婚","催婚","父母","家里","亲戚","朋友","老婆","老公","孩子"],
+            lines:[[3,"亲戚一问近况，你就想找个地缝。"],[2,"那句'都是为你好'，你敢顶回去吗？"],[5,"你连自己都照顾不好，还想照顾谁？"],[4,"你有多久，没主动联系过一个朋友了？"],[3,"饭桌上那句玩笑，别人随口一说，你记了一年。"],[2,"逢年过节，你最怕被问什么，你自己清楚。"],[1,"你总说怕麻烦别人，其实是怕欠下还不起。"],[5,"朋友越来越少，真的是别人的问题？"],[4,"上次聚会你推说忙，其实你在家躺了一天。"],[3,"在爸妈眼里，你还是那个不省心的。"]] },
+          { keys:["暴富","有钱","发财","钱","富","彩票","一夜"],
+            lines:[[1,"暴富？你连彩票都懒得买。"],[3,"购物车加了又删，删了又加，这就是你的命。"],[2,"你羡慕的那些生活，哪一样不要钱？"],[5,"钱没赚到，焦虑倒是日进斗金。"],[2,"想躺赢？先看看银行卡余额再说。"],[4,"上次说要存钱，存折呢？"],[1,"你的赚钱能力，配得上你的欲望吗？"],[3,"同龄人都在谈资产了，你还在谈梦想。"]] },
+          { keys:["瘦","减肥","胖","身材","斤"],
+            lines:[[4,"奶茶戒了吗？先戒了再说瘦。"],[4,"减肥这话，你从去年说到了今年。"],[3,"体重秤不会陪你演戏，数字就在那儿。"],[1,"少吃一口能怎么样？——你每次都说不行。"],[3,"镜子不会骗你，滤镜会。"],[5,"管不住嘴，还想管住人生？"],[2,"万一瘦下来，也没人多看你一眼呢？"],[4,"那条裤子，又拉不上了吧。"]] },
+          { keys:["躺平","摆烂","休息","睡觉","什么都不干","躺"],
+            lines:[[2,"躺平？你躺得安心吗。"],[3,"别人都在往前走，你躺着，只会被越落越远。"],[1,"你所谓的休息，不过是拖延换了个名字。"],[5,"躺一时是爽，一直躺，一直慌。"],[4,"昨天说躺平，今天又焦虑——你到底想怎样？"],[2,"躺久了，连站起来的力气都没了。"],[3,"你羡慕的那些躺平的人，哪个没有底气？"],[5,"没有收入的躺平，不叫躺平，叫等。"]] }
+        ];
+        var PHASES = [
+          { name:"轻声质疑", until:9,  chatMs:1500, barrageMs:0,    flashMs:0,    amp:0.6, vib:null },
+          { name:"开始围攻", until:22, chatMs:950,  barrageMs:2600, flashMs:6000, amp:1.6, vib:[60] },
+          { name:"开始焦虑", until:42, chatMs:520,  barrageMs:1500, flashMs:3600, amp:3.4, vib:[80,40,80] },
+          { name:"失控",     until:64, chatMs:260,  barrageMs:800,  flashMs:2000, amp:6.5, vib:[120,50,120,50,200] },
+          { name:"满屏",     until:1e9,chatMs:130,  barrageMs:130,  flashMs:950,  amp:9.5, vib:[180,60,180,60,320] }
+        ];
+
+        var timers = [], raf = null, running = false;
+        var startAt = 0, hits = 0, phaseIdx = 0, thought = "";
+        var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        /* ---------- 声音 ----------
+           之前真机无声的三个原因：①默认关着、藏在一个小按钮后面，没点就永远没声；
+           ②AudioContext 只在点那个按钮时才建；③底噪是纯低频轰鸣，手机小喇叭发不出那个频段。
+           现在：点「开始」的手势里就建好上下文并默认开声；iOS 17+ 设 audioSession=playback
+           绕开静音开关；被系统打断后在下一次触摸/切回页面时自动 resume。 */
+        var audioCtx = null, noiseGain = null, masterGain = null, soundOn = false;
+        function ensureAudio(){
+          if (audioCtx){ if (audioCtx.state !== "running") audioCtx.resume(); return; }
+          try{
+            if (window.navigator && navigator.audioSession){ try{ navigator.audioSession.type = "playback"; }catch(e){} }
+            var AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return;
+            audioCtx = new AC();
+            if (audioCtx.state !== "running") audioCtx.resume();
+            masterGain = audioCtx.createGain(); masterGain.gain.value = 5.0;
+            /* 主增益后面挂一台压缩器：增益按用户要求拉到 5 倍，峰值被压住不爆音，
+               主观响度整体抬上去——这是这一版音量明显变大的关键。 */
+            var comp = audioCtx.createDynamicsCompressor();
+            comp.threshold.value = -18; comp.knee.value = 12; comp.ratio.value = 12;
+            comp.attack.value = 0.003; comp.release.value = 0.24;
+            masterGain.connect(comp); comp.connect(audioCtx.destination);
+            /* 不带回响：鼓击直通主输出，没有任何延迟/反馈回声通路，
+               一记就是一记，干、闷、近。 */
+            /* 底噪：低频垫底 + 一层白噪声保证中频能量，再用 4.6Hz 缓慢调幅模拟人群嗡嗡声 */
+            var len = audioCtx.sampleRate * 2;
+            var buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+            var d = buf.getChannelData(0);
+            var last = 0;
+            for (var i=0;i<len;i++){ var w = Math.random()*2-1; last = (last + 0.04*w)/1.04; d[i] = last*2.4 + w*0.22; }
+            var src = audioCtx.createBufferSource(); src.buffer = buf; src.loop = true;
+            var lp = audioCtx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 1100; lp.Q.value = 0.4;
+            var mod = audioCtx.createGain(); mod.gain.value = 0.78;
+            var lfo = audioCtx.createOscillator(); lfo.type = "sine"; lfo.frequency.value = 4.6;
+            var lfoAmt = audioCtx.createGain(); lfoAmt.gain.value = 0.22;
+            lfo.connect(lfoAmt); lfoAmt.connect(mod.gain); lfo.start();
+            noiseGain = audioCtx.createGain(); noiseGain.gain.value = 0;
+            src.connect(lp); lp.connect(mod); mod.connect(noiseGain); noiseGain.connect(masterGain);
+            src.start();
+            if (audioCtx.addEventListener) audioCtx.addEventListener("statechange", function(){
+              if (audioCtx && soundOn && audioCtx.state !== "running") audioCtx.resume();
+            });
+          }catch(e){ audioCtx = null; }
+        }
+        function setNoise(level){
+          if (!audioCtx || !noiseGain) return;
+          var t = audioCtx.currentTime;
+          noiseGain.gain.cancelScheduledValues(t);
+          noiseGain.gain.setTargetAtTime(level, t, 0.35);
+        }
+        /* 消息不再带「叮」——每条消息出声只会显得吵，声音只剩鼓点和大字闷响。 */
+        /* 大字闪现/爆炸时的一记闷响：低频垫底之外加一记 210→90Hz 的「敲击」，
+           保证手机喇叭也能清清楚楚听见 */
+        function thud(){
+          if (!audioCtx || !soundOn) return;
+          if (audioCtx.state !== "running"){ audioCtx.resume(); return; }
+          try{
+            var t = audioCtx.currentTime;
+            var o = audioCtx.createOscillator(); o.type = "sine";
+            o.frequency.setValueAtTime(130, t);
+            o.frequency.exponentialRampToValueAtTime(38, t + 0.22);
+            var g = audioCtx.createGain();
+            g.gain.setValueAtTime(0.0001, t);
+            g.gain.exponentialRampToValueAtTime(0.85 + phaseIdx * 0.14, t + 0.015);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+            o.connect(g); g.connect(masterGain); o.start(t); o.stop(t + 0.32);
+            var o2 = audioCtx.createOscillator(); o2.type = "triangle";
+            o2.frequency.setValueAtTime(210, t);
+            o2.frequency.exponentialRampToValueAtTime(90, t + 0.12);
+            var g2 = audioCtx.createGain();
+            g2.gain.setValueAtTime(0.0001, t);
+            g2.gain.exponentialRampToValueAtTime(0.95, t + 0.012);
+            g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+            o2.connect(g2); g2.connect(masterGain); o2.start(t); o2.stop(t + 0.18);
+          }catch(e){}
+        }
+        /* ---------- 鼓点：慢慢提升的主声音 ----------
+           一面鼓：从一声一声慢慢敲开始，间隔随时间指数收紧，
+           2 分钟（120 秒）爬到最密、最重，之后封顶不再加速。
+           鼓型轮换：底鼓 → 低通鼓 → 底鼓 → 高通鼓；爬过半后还会随机插入弱拍，
+           听起来就是心跳被一点点催快、催到失控。
+           上一版听着像噪音的原因：每一击都叠了带通白噪声当「鼓皮」，
+           高音那记还是 2100Hz 的纯噪声爆点，底下又垫着两层一直响的噪声。
+           这一版按「闷一点，像空房间里的一种敲击」重做：基频整体压低
+           （底鼓 120→36Hz），起音放缓、敲击泛音压暗，声音闷而沉。
+           不带回响——没有任何延迟/反馈通路，一记干脆利落；
+           两层持续底噪在轰炸期间也保持静音，让耳朵听到的只有鼓本身。
+           音量这一版大幅抬高：主增益 5.0 并挂压缩器防爆音，每击音量
+           1.15 起步随进度升到 2.7；每击另叠一层中频闷敲（470→150Hz），
+           因为手机小喇叭推不动纯低频——响度主要靠这一层送到耳朵里。 */
+        var drumTimerOn = false, drumCount = 0;
+        function drumInterval(sec){
+          var p = Math.min(sec, 120) / 120;      /* 120 秒为极限 */
+          return 1150 * Math.pow(150 / 1150, p); /* 1150ms → 150ms */
+        }
+        function drumHit(kind, vol){
+          if (!audioCtx || !soundOn) return;
+          if (audioCtx.state !== "running"){ audioCtx.resume(); return; }
+          try{
+            var t = audioCtx.currentTime;
+            function tone(f0, f1, dur, v, type){
+              var o = audioCtx.createOscillator(); o.type = type || "sine";
+              o.frequency.setValueAtTime(f0, t);
+              o.frequency.exponentialRampToValueAtTime(Math.max(26, f1), t + dur * 0.55);
+              var g = audioCtx.createGain();
+              g.gain.setValueAtTime(0.0001, t);
+              g.gain.exponentialRampToValueAtTime(v, t + 0.009); /* 起音放缓，敲击感变闷 */
+              g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+              o.connect(g); g.connect(masterGain);
+              o.start(t); o.stop(t + dur + 0.02);
+            }
+            if (kind === "kick"){
+              tone(120, 36, 0.42, vol * 1.35);                    /* 鼓身：沉得更低、拖得更长 */
+              tone(470, 150, 0.055, vol * 0.9, "triangle");       /* 敲击体：中频的一记闷「笃」，手机喇叭真正能推出来的响度靠它 */
+              tone(240, 96, 0.02, vol * 0.15, "triangle");        /* 敲击点：压暗压弱，只剩一点闷响的头 */
+            }
+            else if (kind === "tom"){
+              tone(150, 62, 0.3, vol * 1.1);
+              tone(390, 140, 0.05, vol * 0.65, "triangle");
+            }
+            else {
+              tone(196, 78, 0.22, vol * 0.8);                     /* 高通鼓，同样压低 */
+              tone(560, 210, 0.045, vol * 0.6, "triangle");
+            }
+          }catch(e){}
+        }
+        function drumLoop(){
+          if (!running || !soundOn || !audioCtx){ drumTimerOn = false; return; }
+          var sec = (Date.now() - startAt) / 1000;
+          var p = Math.min(sec, 120) / 120;
+          var kind = ["kick", "tom", "kick", "hitom"][drumCount % 4];
+          drumHit(kind, 1.15 + 1.55 * p);
+          drumCount++;
+          var gap = drumInterval(sec);
+          if (p > 0.55 && Math.random() < 0.4){
+            later(function(){ drumHit("kick", 0.65 + 0.95 * p); }, gap * 0.5);
+          }
+          later(drumLoop, gap);
+        }
+        function startDrums(){
+          if (drumTimerOn) return;
+          drumTimerOn = true; drumCount = 0;
+          drumLoop();
+        }
+        /* 第二条声音通路：一段运行时现生成的循环噪声，走 <audio> 媒体元素。
+           某些手机/内置浏览器会按静音键或省电策略压住 WebAudio，
+           媒体元素的播放通道与它相互独立——两条路有一条通，就有声。 */
+        var mediaEl = null;
+        function ensureMediaNoise(){
+          if (mediaEl) return;
+          try{
+            var sr = 22050, len = sr * 2;
+            var data = new Int16Array(len), last = 0;
+            for (var i = 0; i < len; i++){
+              var w = Math.random() * 2 - 1;
+              last = (last + 0.03 * w) / 1.03;
+              var v = last * 2.3 + w * 0.18;
+              if (v > 1) v = 1; if (v < -1) v = -1;
+              data[i] = v * 26000;
+            }
+            var wav = new DataView(new ArrayBuffer(44 + len * 2));
+            function ws(off, str){ for (var j = 0; j < str.length; j++) wav.setUint8(off + j, str.charCodeAt(j)); }
+            ws(0, "RIFF"); wav.setUint32(4, 36 + len * 2, true); ws(8, "WAVEfmt ");
+            wav.setUint32(16, 16, true); wav.setUint16(20, 1, true); wav.setUint16(22, 1, true);
+            wav.setUint32(24, sr, true); wav.setUint32(28, sr * 2, true); wav.setUint16(32, 2, true); wav.setUint16(34, 16, true);
+            ws(36, "data"); wav.setUint32(40, len * 2, true);
+            for (var k = 0; k < len; k++) wav.setInt16(44 + k * 2, data[k], true);
+            mediaEl = new Audio(URL.createObjectURL(new Blob([wav.buffer], { type: "audio/wav" })));
+            mediaEl.loop = true; mediaEl.volume = 0; mediaEl.preload = "auto";
+          }catch(e){ mediaEl = null; }
+        }
+        function setMediaLevel(level){
+          if (!mediaEl) return;
+          try{
+            mediaEl.volume = Math.max(0, Math.min(1, level));
+            if (level > 0 && mediaEl.paused){
+              var pr = mediaEl.play();
+              if (pr && pr.catch) pr.catch(function(){});
+            }
+            if (level <= 0 && !mediaEl.paused) mediaEl.pause();
+          }catch(e){}
+        }
+        /* 供测试探针读取声音通路状态（页面上不可见） */
+        window.__floodAudioState = function(){
+          return {
+            ctx: audioCtx ? audioCtx.state : "none",
+            on: soundOn,
+            media: mediaEl ? (mediaEl.paused ? "paused" : "playing") : "none",
+            mediaVol: mediaEl ? mediaEl.volume : -1,
+            drumOn: drumTimerOn,
+            drumBeats: drumCount,
+            drumGapMs: Math.round(drumInterval(startAt ? (Date.now() - startAt) / 1000 : 0))
+          };
+        };
+        document.addEventListener("pointerdown", function(){
+          if (audioCtx && soundOn && audioCtx.state !== "running") audioCtx.resume();
+        });
+        document.addEventListener("visibilitychange", function(){
+          if (!document.hidden && audioCtx && soundOn && audioCtx.state !== "running") audioCtx.resume();
+        });
+        $("soundBtn").addEventListener("click", function(){
+          ensureAudio();
+          ensureMediaNoise();
+          if (audioCtx && audioCtx.state !== "running") audioCtx.resume();
+          soundOn = !soundOn;
+          this.textContent = soundOn ? "🔊" : "🔇";
+          if (!soundOn){ setNoise(0); setMediaLevel(0); }
+          else { startDrums(); }
+        });
+
+        function every(fn, ms){ var id = setInterval(fn, ms); timers.push(id); return id; }
+        function later(fn, ms){ var id = setTimeout(fn, ms); timers.push(id); return id; }
+        function clearAll(){
+          timers.forEach(function(id){ clearInterval(id); clearTimeout(id); });
+          timers = [];
+          if (raf) cancelAnimationFrame(raf); raf = null;
+          if (navigator.vibrate) navigator.vibrate(0);
+          setNoise(0);
+          setMediaLevel(0);
+        }
+        function rnd(a){ return a[Math.floor(Math.random()*a.length)]; }
+        function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+        /* ---------- 随机符号：每次随机挑 0–3 个，随机挂在句首或句尾，不固定 ---------- */
+        var SYMS = ["💢","💥","❗","‼️","⁉️","⚡","💣","🔥","🗯️","💀","🌀","🚨","✴️","🔴"];
+        function sprinkle(text){
+          if (Math.random() < 0.45) return text;
+          var n = 1 + Math.floor(Math.random() * 3), pre = "", post = "";
+          for (var i = 0; i < n; i++){
+            var s = SYMS[Math.floor(Math.random() * SYMS.length)];
+            if (Math.random() < 0.5) pre += s; else post += s;
+          }
+          return (pre ? pre + " " : "") + text + (post ? " " + post : "");
+        }
+        /* ---------- 3 秒内同一个句子/词被再次随机到 → 爆炸 ---------- */
+        var seenAt = {};
+        function markSeen(key){
+          var now = performance.now();
+          var prev = seenAt[key];
+          seenAt[key] = now;
+          var keys = Object.keys(seenAt);
+          if (keys.length > 60){
+            for (var i = 0; i < keys.length; i++) if (now - seenAt[keys[i]] > 6000) delete seenAt[keys[i]];
+          }
+          return prev !== undefined && (now - prev) < 3000;
+        }
+        var lastBoomFx = 0;
+        function boomFx(){
+          var now = performance.now();
+          if (now - lastBoomFx < 450) return;
+          lastBoomFx = now;
+          thud();
+          if (navigator.vibrate) navigator.vibrate(60);
+        }
+
+        function personalLines(){
+          var t = thought;
+          return [
+            "「" + t + "」？你自己信吗。",
+            "还想着" + t + "，先照照镜子。",
+            "你上次说要" + t + "，结果呢？",
+            t + "——这种话，你也说得出口。",
+            "别想了。" + t + "，轮不到你。",
+            "为了" + t + "，你熬了几个夜？一个都没有。",
+            t + "，说一次，空一次。",
+            "「" + t + "」？呵。",
+            "你连" + t + "，都不敢当着人说出口。",
+            "为了" + t + "，你哭过几回了？数数。",
+            t + "这件事，你跟三个人说过，一个都没成。",
+            "半夜想着" + t + "，白天装没事，你演得不累吗？",
+            "备忘录里那条" + t + "，还留着呢？删了吧。",
+            "你搜过多少次和" + t + "有关的问题了？心里没数？",
+            "「" + t + "」——这话你敢发朋友圈吗？",
+            "你为了" + t + "，做的第一件事，是刷手机。",
+            "梦里你倒是做到了" + t + "，醒来呢？",
+            "你连说出" + t + "的时候，声音都在抖。",
+            t + "——说给谁听呢？说给你自己壮胆的。",
+            "为了" + t + "，你列了几张计划表了？执行过一张吗？",
+            "你把" + t + "想了一百遍，脚下一步没动。",
+            "这句「" + t + "」，你已经说了几个月了？",
+            "搜" + t + "的攻略搜了几十篇，第一步迈出去了吗？",
+            "你为了" + t + "立的 flag，墓碑都刻不下了。"
+          ];
+        }
+
+        /* ---------- 洗牌牌堆：抽完一整轮才重洗，杜绝短时重复 ---------- */
+        function shuffle(a){
+          for (var i = a.length - 1; i > 0; i--){
+            var j = Math.floor(Math.random() * (i + 1));
+            var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+          }
+          return a;
+        }
+        var deck = [], lastLine = "";
+        function topicPool(){
+          var out = [];
+          for (var ti = 0; ti < TOPICS.length; ti++){
+            var hit = false;
+            for (var ki = 0; ki < TOPICS[ti].keys.length; ki++){
+              if (thought.indexOf(TOPICS[ti].keys[ki]) >= 0){ hit = true; break; }
+            }
+            if (hit) out = out.concat(TOPICS[ti].lines);
+          }
+          return out;
+        }
+        function buildDeck(){
+          var pool = [];
+          for (var k = 0; k <= 5; k++) pool = pool.concat(LINES[k].map(function(line){ return { line: line, v: k }; }));
+          var tp = topicPool();
+          tp = tp.concat(tp); /* 命中的情境句进两份，出现得更密 */
+          pool = pool.concat(tp.map(function(pair){ return { line: pair[1], v: pair[0] }; }));
+          pool = pool.concat(personalLines().map(function(line){ return { line: line, v: 0 }; }));
+          deck = shuffle(pool);
+        }
+        function nextLine(){
+          if (!deck.length) buildDeck();
+          var pick = deck.pop();
+          if (pick.line === lastLine && deck.length){ var alt = deck.pop(); deck.push(pick); pick = alt; }
+          lastLine = pick.line;
+          return pick;
+        }
+        var barrageBag = [];
+        function nextBarrage(){
+          if (!barrageBag.length) barrageBag = shuffle(BARRAGE.slice());
+          return barrageBag.pop();
+        }
+        var notifBag = [];
+        function nextNotif(){
+          if (!notifBag.length) notifBag = shuffle(NOTIFS.slice());
+          return notifBag.pop();
+        }
+
+        function addBubble(html, voice, cls){
+          var div = document.createElement("div");
+          div.className = "bubble" + (cls ? " " + cls : "");
+          div.innerHTML = (voice ? '<span class="voice ' + voice.cls + '">声音 · ' + voice.name + "</span>" : "") + html;
+          if (cls !== "mine"){
+            /* 落点随档位从左侧逐步向中间、再向全屏扩散 */
+            var driftMax = [0, 10, 26, 48, 72][phaseIdx];
+            var drift = Math.random() * driftMax;
+            if (drift > 1){
+              div.style.marginLeft = drift + "%";
+              div.style.maxWidth = Math.max(38, 94 - drift) + "%";
+            }
+          }
+          stream.appendChild(div);
+          hits++; hitEl.textContent = hits;
+          while (stream.children.length > 46) stream.removeChild(stream.firstChild);
+          return div;
+        }
+        /* 同一句 3 秒内又被抽到：这条气泡当场炸开——放大抖动、符号四溅、全屏红闪 */
+        function explode(el){
+          thud();
+          if (navigator.vibrate) navigator.vibrate([90, 40, 140]);
+          var flash = document.createElement("div");
+          flash.className = "boom-flash";
+          flash.addEventListener("animationend", function(){ flash.remove(); });
+          flashLayer.appendChild(flash);
+          if (!el || !el.parentNode) return;
+          var cx = el.offsetLeft + el.offsetWidth / 2, cy = el.offsetTop + el.offsetHeight / 2;
+          var glyphs = ["💢","💥","✴️","💢","💥","⚡","🗯️"];
+          for (var i = 0; i < glyphs.length; i++){
+            var p = document.createElement("span");
+            p.className = "burst-p";
+            p.textContent = glyphs[i];
+            p.style.left = cx + "px"; p.style.top = cy + "px";
+            p.style.fontSize = (16 + Math.random() * 18) + "px";
+            var ang = Math.random() * Math.PI * 2, dist = 46 + Math.random() * 90;
+            p.style.setProperty("--bx", Math.cos(ang) * dist + "px");
+            p.style.setProperty("--by", (Math.sin(ang) * dist - 20) + "px");
+            p.style.setProperty("--br", (Math.random() * 220 - 110) + "deg");
+            (function(node){ node.addEventListener("animationend", function(){ node.remove(); }); })(p);
+            stream.appendChild(p);
+          }
+        }
+        function spawnChat(){
+          if (!running) return;
+          var pick = nextLine();
+          var boom = markSeen("L:" + pick.line);
+          var el = addBubble(esc(sprinkle(pick.line)), VOICES[pick.v],
+            boom ? "boom" : (phaseIdx >= 2 && Math.random() < 0.4 ? "hot" : ""));
+          if (boom) explode(el);
+        }
+        function spawnBarrage(){
+          if (!running) return;
+          var burst = phaseIdx >= 4 ? 3 : 1;
+          /* 弹幕从左边缘飘入，飘行距离随档位增长：第2档只到左1/3，第3档过半，第4档近全屏，第5档双向全程横飞 */
+          var travel = [0, 30, 55, 85, 118];
+          for (var i = 0; i < burst; i++){
+            var s = document.createElement("span");
+            var fromRight = phaseIdx >= 4 && Math.random() < 0.5;
+            var word = nextBarrage();
+            var bBoom = markSeen("B:" + word);
+            s.className = "barrage" + (Math.random() < 0.45 ? " red" : "") + (bBoom ? " boom-b" : "");
+            s.textContent = bBoom ? word + "💥" : (Math.random() < 0.3 ? sprinkle(word) : word);
+            if (bBoom) boomFx();
+            s.style.top = (2 + Math.random() * 92) + "%";
+            s.style.left = "0";
+            var baseSize = phaseIdx >= 4 ? 22 + Math.random() * 42 : 17 + Math.random() * 30;
+            s.style.fontSize = (bBoom ? baseSize * 1.6 : baseSize) + "px";
+            s.style.setProperty("--fo", (0.65 + Math.random() * 0.35).toFixed(2));
+            if (!fromRight){
+              s.style.setProperty("--fx0", "-120%");
+              s.style.setProperty("--fx1", travel[phaseIdx] + "vw");
+            }
+            var dur = 2.6 + Math.random() * 2.6 - phaseIdx * 0.35;
+            s.style.animationDuration = Math.max(1.1, dur) + "s";
+            (function(el){ el.addEventListener("animationend", function(){ el.remove(); }); })(s);
+            barrageLayer.appendChild(s);
+            hits++; hitEl.textContent = hits;
+          }
+          while (barrageLayer.children.length > 90) barrageLayer.removeChild(barrageLayer.firstChild);
+        }
+        function buildWall(){
+          floodWall.innerHTML = "";
+          for (var r = 0; r < 26; r++){
+            var row = document.createElement("div");
+            row.className = "row";
+            var txt = "";
+            for (var c = 0; c < 14; c++) txt += nextBarrage() + "　";
+            row.textContent = txt;
+            row.style.fontSize = (20 + Math.random() * 30) + "px";
+            row.style.animationDuration = (3 + Math.random() * 5) + "s";
+            floodWall.appendChild(row);
+          }
+        }
+        var ATTACK_WORDS = ["不行。","你配吗？","算了吧。","别做梦了。","认命吧。","闭嘴。","够了。","别想了。","醒醒。","没救了。","又来了。","你完了。","停下。"];
+        var SELF_WORDS = ["别吵了","停一下","安静一点","让我想想","别说了","求你们了","闭嘴","我受不了了","停","让我静一静","别再说了","头要炸了","别逼我了","别说了行吗","脑子快炸了","能不能安静一分钟","别再刷了","放过我吧","让我一个人待会儿","真的受不了了","我错了行吗","喘口气行吗"];
+        var FORGET_WORDS = ["我刚才……想说什么来着","最初的问题，是什么来着","想不起来了","我到底在纠结什么","等等，我本来想问什么","我最初……到底在想什么","那个问题……被谁盖过去了","想不起来了，真的想不起来了","我本来，是为什么开始想的","等等，我的问题呢"];
+        function oneFlash(){
+          var kind = "attack", word = rnd(ATTACK_WORDS), size = "clamp(56px, 19vw, 120px)";
+          var r = Math.random();
+          if (phaseIdx >= 4 && r < 0.34){
+            kind = "forget"; word = rnd(FORGET_WORDS); size = "clamp(32px, 10vw, 62px)";
+          } else if (phaseIdx >= 2 && r < (phaseIdx >= 3 ? 0.88 : 0.7)){
+            kind = "self"; word = rnd(SELF_WORDS);
+            size = ["", "", "clamp(52px, 16vw, 104px)", "clamp(68px, 21vw, 138px)", "clamp(84px, 27vw, 176px)"][phaseIdx];
+          }
+          var el = document.createElement("div");
+          el.className = "flash-word " + kind;
+          el.style.left = (50 + (Math.random() * 16 - 8)) + "%";
+          el.style.top = (44 + (Math.random() * 18 - 9)) + "%";
+          var span = document.createElement("span");
+          span.textContent = word;
+          span.style.fontSize = size;
+          el.appendChild(span);
+          el.addEventListener("animationend", function(){ el.remove(); });
+          flashLayer.appendChild(el);
+          while (flashLayer.children.length > 6) flashLayer.removeChild(flashLayer.firstChild);
+        }
+        function spawnFlash(){
+          if (!running) return;
+          oneFlash();
+          thud();
+          if (phaseIdx >= 4 && Math.random() < 0.45) later(oneFlash, 160);
+          else if (phaseIdx >= 3 && Math.random() < 0.25) later(oneFlash, 220);
+        }
+        function spawnNotif(){
+          if (!running) return;
+          var n = nextNotif();
+          var div = document.createElement("div");
+          div.className = "notif";
+          div.style.top = (8 + notifLayer.children.length * 6) + "px";
+          div.innerHTML = '<span class="dot"></span><div><div class="app">' + n.app + '</div><div class="msg">' + n.msg + "</div></div>";
+          notifLayer.appendChild(div);
+          hits++; hitEl.textContent = hits;
+          later(function(){ div.classList.add("out"); later(function(){ div.remove(); }, 400); }, 3400);
+          if (navigator.vibrate) navigator.vibrate(70);
+        }
+
+        function phaseOf(sec){
+          for (var i = 0; i < PHASES.length; i++) if (sec < PHASES[i].until) return i;
+          return PHASES.length - 1;
+        }
+        var spawners = {};
+        function armSpawners(idx){
+          Object.keys(spawners).forEach(function(k){ clearInterval(spawners[k]); });
+          timers = timers.filter(function(id){ return Object.keys(spawners).indexOf(String(id)) < 0; });
+          spawners = {};
+          var p = PHASES[idx];
+          spawners.chat = every(spawnChat, p.chatMs);
+          if (p.barrageMs) spawners.barrage = every(spawnBarrage, p.barrageMs);
+          if (p.flashMs) spawners.flash = every(spawnFlash, p.flashMs);
+          if (idx >= 2) spawners.notif = every(spawnNotif, 7000);
+        }
+        function shakeLoop(){
+          if (!running) return;
+          var p = PHASES[phaseIdx];
+          var amp = reduced ? 0 : p.amp;
+          var x = (Math.random() * 2 - 1) * amp, y = (Math.random() * 2 - 1) * amp;
+          var r = (Math.random() * 2 - 1) * amp * 0.06;
+          shakeWrap.style.transform = "translate(" + x + "px," + y + "px) rotate(" + r + "deg)";
+          raf = requestAnimationFrame(function(){ setTimeout(shakeLoop, 55); });
+        }
+        function tick(){
+          if (!running) return;
+          var sec = (Date.now() - startAt) / 1000;
+          var m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+          clockEl.textContent = (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+          var idx = phaseOf(sec);
+          if (idx !== phaseIdx){
+            phaseIdx = idx;
+            phaseTag.textContent = PHASES[idx].name;
+            statusEl.textContent = ["正在输入……","声音们来了……","它们在刷屏……你开始喊了。没有人听。","关不掉。关不掉。关不掉。","满屏了。你最初的问题，已经想不起来了。"][idx];
+            var echoFx = [[0,1],[0.6,0.92],[1.8,0.76],[3.4,0.52],[7,0.26]][idx];
+            echoText.style.filter = "blur(" + echoFx[0] + "px)";
+            echoText.style.opacity = echoFx[1];
+            echoLabel.textContent = idx >= 4 ? "你最初的问题 · 还记得吗" : "你最初的问题";
+            redPulse.style.opacity = idx >= 2 ? (idx >= 3 ? 0.95 : 0.55) : 0;
+            flood.classList.toggle("p5", idx >= 4);
+            armSpawners(idx);
+            var vib = PHASES[idx].vib;
+            if (vib && navigator.vibrate) navigator.vibrate(vib);
+          }
+          /* 底噪与媒体噪声层在轰炸期间保持静音——持续的嘶声会把鼓冲成一片噪音；
+             声音只剩鼓点与大字闷响，鼓才听得清。 */
+          if (sec > 22) hint.classList.add("show");
+        }
+
+        function start(){
+          thought = (input.value || "").trim() || "我想改变";
+          intro.classList.remove("on"); calm.classList.remove("on");
+          flood.classList.add("on");
+          document.body.style.overflow = "hidden";
+          stream.innerHTML = ""; barrageLayer.innerHTML = ""; notifLayer.innerHTML = ""; flashLayer.innerHTML = "";
+          flood.classList.remove("p5");
+          buildWall();
+          hits = 0; phaseIdx = 0; hitEl.textContent = "0"; clockEl.textContent = "00:00";
+          phaseTag.textContent = PHASES[0].name;
+          statusEl.textContent = "正在输入……";
+          redPulse.style.opacity = 0; hint.classList.remove("show");
+          shakeWrap.style.transform = "";
+          running = true; startAt = Date.now();
+          /* 在点击手势里建上下文并默认开声——这是真机能出声的关键一步；
+             两条通路（WebAudio + 媒体元素）同时点火，再补两次延迟 resume 兜底 */
+          soundOn = true;
+          ensureAudio();
+          ensureMediaNoise();
+          setMediaLevel(0); /* 噪声层全程静音，只让鼓点发声 */
+          later(function(){ if (audioCtx && audioCtx.state !== "running") audioCtx.resume(); }, 300);
+          later(function(){ if (audioCtx && audioCtx.state !== "running") audioCtx.resume(); }, 1200);
+          $("soundBtn").textContent = "🔊";
+          drumTimerOn = false;
+          startDrums();
+          buildDeck(); lastLine = ""; notifBag = []; barrageBag = []; seenAt = {};
+          addBubble('<span class="voice">你 · 刚刚</span>' + esc(thought), null, "mine");
+          echoText.textContent = thought;
+          echoText.style.filter = "blur(0px)"; echoText.style.opacity = 1;
+          echoLabel.textContent = "你最初的问题";
+          statusEl.textContent = "对方正在输入……";
+          later(function(){ statusEl.textContent = "正在输入……"; spawnChat(); }, 1100);
+          later(function(){ spawnChat(); }, 2100);
+          armSpawners(0);
+          every(tick, 250);
+          shakeLoop();
+        }
+        function stop(){
+          if (!running) return;
+          running = false;
+          var sec = Math.round((Date.now() - startAt) / 1000);
+          clearAll();
+          flood.classList.remove("on");
+          flood.classList.remove("p5");
+          document.body.style.overflow = "";
+          shakeWrap.style.transform = "";
+          $("statTime").textContent = sec >= 60 ? Math.floor(sec / 60) + "分" + (sec % 60) + "秒" : sec + "秒";
+          $("statHits").textContent = hits;
+          $("statPhase").textContent = PHASES[phaseIdx].name;
+          $("byeMsg").classList.remove("show");
+          calm.classList.add("on");
+          window.scrollTo(0, 0);
+        }
+
+        $("chips").addEventListener("click", function(e){
+          var b = e.target.closest(".chip"); if (!b) return;
+          input.value = b.textContent.trim(); input.focus();
+        });
+        input.addEventListener("keydown", function(e){ if (e.key === "Enter") start(); });
+        $("startBtn").addEventListener("click", start);
+        $("exitBtn").addEventListener("click", stop);
+        document.addEventListener("keydown", function(e){ if (e.key === "Escape") stop(); });
+        $("againBtn").addEventListener("click", function(){
+          calm.classList.remove("on"); intro.classList.add("on");
+          input.value = ""; window.scrollTo(0, 0); input.focus();
+        });
+        $("doneBtn").addEventListener("click", function(){ $("byeMsg").classList.add("show"); });
+      })();
+    </script>
+  </body>
+</html>

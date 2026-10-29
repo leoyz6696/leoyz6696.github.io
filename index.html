@@ -1,0 +1,2381 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>止戈 · 人性暗线拆解者</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0b0b0d;
+        --bg-2: #121215;
+        --panel: #151518;
+        --ink: #e9e6df;
+        --ink-dim: #a3a099;
+        --faint: #63615b;
+        --line: rgba(233, 230, 223, 0.14);
+        --line-soft: rgba(233, 230, 223, 0.07);
+        --accent: #b8402a;
+        --accent-soft: rgba(184, 64, 42, 0.16);
+        --hero-shade: linear-gradient(100deg, rgba(11, 11, 13, 0.97) 30%, rgba(11, 11, 13, 0.72) 58%, rgba(11, 11, 13, 0.25) 100%);
+        --hero-shade-b: linear-gradient(to top, #0b0b0d 4%, rgba(11, 11, 13, 0) 42%);
+        --nav-bg: rgba(11, 11, 13, 0.82);
+        --grain-op: 0.05;
+        --serif: "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+        --sans: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #eae8e3;
+          --bg-2: #e1ded7;
+          --panel: #f0eee8;
+          --ink: #17171a;
+          --ink-dim: #55534d;
+          --faint: #8f8c83;
+          --line: rgba(23, 23, 26, 0.18);
+          --line-soft: rgba(23, 23, 26, 0.08);
+          --accent: #9c3524;
+          --accent-soft: rgba(156, 53, 36, 0.1);
+          --hero-shade: linear-gradient(100deg, rgba(234, 232, 227, 0.96) 26%, rgba(234, 232, 227, 0.66) 58%, rgba(234, 232, 227, 0.18) 100%);
+          --hero-shade-b: linear-gradient(to top, #eae8e3 4%, rgba(234, 232, 227, 0) 42%);
+          --nav-bg: rgba(234, 232, 227, 0.85);
+          --grain-op: 0.04;
+        }
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-weight: 300;
+        line-height: 1.9;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+      ::selection { background: var(--accent); color: #fff; }
+      img { display: block; max-width: 100%; }
+      a { color: inherit; }
+
+      /* film grain */
+      .grain {
+        position: fixed; inset: -50%; z-index: 60; pointer-events: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+        opacity: var(--grain-op);
+        animation: grain 9s steps(6) infinite;
+      }
+      @keyframes grain {
+        0%, 100% { transform: translate(0, 0); }
+        20% { transform: translate(-3%, 2%); }
+        40% { transform: translate(2%, -3%); }
+        60% { transform: translate(-2%, -2%); }
+        80% { transform: translate(3%, 3%); }
+      }
+
+      /* progress */
+      #progress {
+        position: fixed; top: 0; left: 0; z-index: 80;
+        width: 100%; height: 2px; background: var(--accent);
+        transform-origin: 0 50%; transform: scaleX(0);
+      }
+
+      /* nav */
+      nav {
+        position: fixed; top: 0; left: 0; right: 0; z-index: 70;
+        background: var(--nav-bg);
+        backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--line-soft);
+      }
+      .nav-in {
+        max-width: 1180px; margin: 0 auto; padding: 0 22px;
+        display: flex; align-items: center; gap: 26px; height: 52px;
+      }
+      .nav-name { font-family: var(--serif); font-weight: 900; font-size: 1.05rem; letter-spacing: 0.3em; white-space: nowrap; }
+      .nav-name i { color: var(--accent); font-style: normal; }
+      .nav-links { display: flex; gap: 4px; margin-left: auto; overflow-x: auto; scrollbar-width: none; }
+      .nav-links::-webkit-scrollbar { display: none; }
+      .nav-links a {
+        text-decoration: none; font-size: 0.82rem; letter-spacing: 0.14em;
+        color: var(--ink-dim); padding: 6px 10px; white-space: nowrap;
+        border-bottom: 1px solid transparent; transition: color 0.25s, border-color 0.25s;
+      }
+      .nav-links a:hover { color: var(--ink); }
+      .nav-links a.on { color: var(--ink); border-bottom-color: var(--accent); }
+
+      main { position: relative; z-index: 1; }
+      .wrap { max-width: 1180px; margin: 0 auto; padding: 0 22px; }
+
+      /* ---------- hero ---------- */
+      .hero { position: relative; min-height: 100svh; display: flex; align-items: stretch; overflow: hidden; }
+      .hero-img {
+        position: absolute; inset: 0;
+        background: url("hero.webp") center 30% / cover no-repeat;
+      }
+      .hero-img::after { content: ""; position: absolute; inset: 0; background: var(--hero-shade); }
+      .hero-img::before { content: ""; position: absolute; inset: 0; background: var(--hero-shade-b); z-index: 1; }
+      .hero-in {
+        position: relative; z-index: 2; width: 100%;
+        max-width: 1180px; margin: 0 auto; padding: 120px 22px 64px;
+        display: flex; flex-direction: column; justify-content: flex-end;
+      }
+      .hero-vert {
+        position: absolute; top: 110px; right: 30px; z-index: 2;
+        writing-mode: vertical-rl; font-family: var(--serif); font-weight: 600;
+        font-size: 0.95rem; letter-spacing: 0.55em; color: var(--ink-dim);
+        display: flex; align-items: center; gap: 14px;
+      }
+      .hero-vert::after { content: ""; width: 1px; height: 74px; background: var(--accent); }
+      .hero h1 {
+        font-family: var(--serif); font-weight: 900;
+        font-size: clamp(6.5rem, 24vw, 15.5rem);
+        line-height: 0.98; margin: 0; letter-spacing: 0.04em;
+        text-shadow: 0 6px 44px rgba(0, 0, 0, 0.35);
+      }
+      .hero-sub {
+        display: flex; align-items: center; gap: 16px; margin-top: 26px;
+        font-family: var(--serif); font-weight: 700;
+        font-size: clamp(1.25rem, 3.4vw, 1.9rem); letter-spacing: 0.42em;
+      }
+      .hero-sub::before { content: ""; width: 52px; height: 2px; background: var(--accent); flex: none; }
+      .hero-quote {
+        margin-top: clamp(38px, 7vh, 72px); max-width: 15em;
+        font-family: var(--serif); font-weight: 600;
+        font-size: clamp(1.7rem, 5.2vw, 3.1rem); line-height: 1.5; letter-spacing: 0.06em;
+      }
+      .hero-quote .qm { color: var(--accent); }
+      .hero-tags { margin-top: 34px; display: flex; flex-wrap: wrap; gap: 10px 0; font-size: 0.86rem; letter-spacing: 0.18em; color: var(--ink-dim); }
+      .hero-tags span { padding: 0 14px; border-left: 1px solid var(--line); }
+      .hero-tags span:first-child { padding-left: 0; border-left: none; }
+      .hero-scroll {
+        margin-top: 46px; font-size: 0.72rem; letter-spacing: 0.4em; color: var(--faint);
+        display: flex; align-items: center; gap: 12px;
+      }
+      .hero-scroll::after { content: ""; width: 1px; height: 40px; background: var(--line); animation: drop 2.4s ease-in-out infinite; }
+      @keyframes drop { 0%, 100% { transform: scaleY(0.4); transform-origin: top; } 50% { transform: scaleY(1); } }
+
+      /* ---------- sections ---------- */
+      section.blk { padding: clamp(72px, 11vh, 120px) 0 0; }
+      .blk-head { display: flex; align-items: baseline; gap: 18px; border-top: 1px solid var(--line); padding-top: 22px; margin-bottom: 44px; }
+      .blk-no { font-family: var(--serif); font-size: 0.85rem; color: var(--accent); letter-spacing: 0.2em; font-weight: 700; }
+      .blk-title { font-family: var(--serif); font-weight: 900; font-size: clamp(1.7rem, 4.6vw, 2.5rem); letter-spacing: 0.22em; margin: 0; }
+      .blk-note { margin-left: auto; font-size: 0.8rem; color: var(--faint); letter-spacing: 0.14em; text-align: right; }
+
+      .about-text {
+        font-family: var(--serif); font-weight: 600;
+        font-size: clamp(1.15rem, 2.9vw, 1.65rem); line-height: 2.15; letter-spacing: 0.05em;
+        max-width: 24em;
+      }
+      .about-text b { color: var(--accent); font-weight: 700; }
+      .about-side { margin-top: 34px; color: var(--ink-dim); font-size: 0.92rem; letter-spacing: 0.1em; max-width: 34em; }
+
+      /* editorial rows */
+      .rows { border-top: 1px solid var(--line-soft); }
+      .row {
+        display: flex; align-items: baseline; gap: 20px;
+        padding: 20px 6px; border-bottom: 1px solid var(--line-soft);
+        transition: background 0.25s, padding-left 0.25s;
+      }
+      .row:hover { background: var(--accent-soft); padding-left: 14px; }
+      .row .idx { font-family: var(--serif); font-size: 0.8rem; color: var(--faint); letter-spacing: 0.15em; flex: none; width: 2.2em; }
+      .row .ttl { font-family: var(--serif); font-weight: 700; font-size: clamp(1.05rem, 2.6vw, 1.4rem); letter-spacing: 0.06em; }
+      .row .meta { margin-left: auto; text-align: right; font-size: 0.85rem; color: var(--ink-dim); letter-spacing: 0.12em; white-space: nowrap; }
+      .row .meta b { font-family: var(--serif); color: var(--ink); font-size: 1.05rem; letter-spacing: 0.05em; }
+      .row.feature .ttl { font-size: clamp(1.5rem, 4.4vw, 2.3rem); font-weight: 900; }
+      .row.feature .meta b { color: var(--accent); font-size: 1.35rem; }
+      .row .sub { display: block; font-family: var(--sans); font-weight: 300; font-size: 0.85rem; color: var(--ink-dim); letter-spacing: 0.08em; margin-top: 4px; }
+
+      .subhead {
+        display: flex; align-items: center; gap: 14px; margin: 52px 0 6px;
+        font-family: var(--serif); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.3em;
+      }
+      .subhead::after { content: ""; flex: 1; height: 1px; background: var(--line-soft); }
+      .subhead:first-of-type { margin-top: 0; }
+      .essay-line { padding: 20px 6px; border-bottom: 1px solid var(--line-soft); display: flex; gap: 20px; align-items: baseline; flex-wrap: wrap; }
+      .essay-line .ttl { font-family: var(--serif); font-weight: 700; font-size: 1.15rem; letter-spacing: 0.08em; }
+      .essay-line .meta { margin-left: auto; font-size: 0.85rem; color: var(--ink-dim); letter-spacing: 0.12em; }
+      .style-line {
+        margin-top: 40px; padding: 26px 28px; border-left: 2px solid var(--accent);
+        background: var(--panel); font-family: var(--serif); font-weight: 600;
+        font-size: clamp(1rem, 2.4vw, 1.2rem); line-height: 2; letter-spacing: 0.06em;
+      }
+      .style-line small { display: block; font-family: var(--sans); font-weight: 400; font-size: 0.75rem; letter-spacing: 0.34em; color: var(--faint); margin-bottom: 10px; }
+
+      /* tracks */
+      .track { cursor: default; }
+      .track .fmt { font-size: 0.72rem; letter-spacing: 0.3em; color: var(--faint); border: 1px solid var(--line); padding: 3px 9px; white-space: nowrap; }
+      .track.active { background: var(--accent-soft); }
+      .track.active .ttl { color: var(--accent); }
+
+      /* audio player */
+      .track.playable { align-items: center; cursor: pointer; }
+      .track.playable:hover { background: var(--accent-soft); }
+      .pbtn {
+        flex: none; width: 42px; height: 42px; border-radius: 50%;
+        border: 1px solid var(--line); background: transparent; color: var(--ink);
+        display: inline-flex; align-items: center; justify-content: center;
+        cursor: pointer; padding: 0;
+        transition: border-color 0.25s, color 0.25s, background 0.25s;
+      }
+      .pbtn:hover { border-color: var(--accent); color: var(--accent); }
+      .pbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+      .pbtn svg { width: 15px; height: 15px; fill: currentColor; display: block; }
+      .pbtn .ic-pause { display: none; }
+      .track.playing { background: var(--accent-soft); }
+      .track.playing .ttl { color: var(--accent); }
+      .track.playing .pbtn { border-color: var(--accent); color: var(--accent); }
+      .track.playing .pbtn .ic-play { display: none; }
+      .track.playing .pbtn .ic-pause { display: block; }
+      .tinfo { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 9px; }
+      .pbar {
+        position: relative; height: 3px; background: var(--line); cursor: pointer;
+        touch-action: none;
+      }
+      .pbar:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+      .pfill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: var(--accent); pointer-events: none; }
+      .pfill::after {
+        content: ""; position: absolute; right: -5px; top: 50%;
+        width: 9px; height: 9px; border-radius: 50%;
+        background: var(--accent); transform: translateY(-50%);
+      }
+      .ptime { font-size: 0.85rem; color: var(--ink-dim); letter-spacing: 0.1em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+      /* 歌词展开 */
+      .lyr-bar { margin-top: 10px; }
+      .lyr-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: transparent; border: 1px solid var(--line-soft); color: var(--ink-dim);
+        font-family: var(--serif); font-weight: 700; font-size: 0.78rem; letter-spacing: 0.3em;
+        padding: 5px 12px 5px 15px; cursor: pointer;
+        transition: border-color 0.25s, color 0.25s, background 0.25s;
+      }
+      .lyr-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+      .lyr-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+      .lyr-btn .chev { flex: none; width: 11px; height: 11px; transition: transform 0.3s; }
+      .lyr-btn .chev path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .lyr-btn[aria-expanded="true"] .chev { transform: rotate(180deg); }
+      .lyrics {
+        flex: 1 1 100%; max-height: 46vh; overflow-y: auto; overscroll-behavior: contain;
+        padding: 18px 10px 12px 116px; cursor: text;
+        scrollbar-width: thin; scrollbar-color: var(--line) transparent;
+      }
+      .lyrics[hidden] { display: none; }
+      .lyrics p { margin: 0 0 1.15em; font-family: var(--serif); font-weight: 600; font-size: 0.95rem; line-height: 2; letter-spacing: 0.05em; }
+      .lyrics p.lyr-sec { margin-bottom: 0.35em; }
+      .lyr-tag { font-family: var(--sans); font-weight: 400; font-size: 0.7rem; letter-spacing: 0.26em; color: var(--faint); }
+      @media (max-width: 760px) { .lyrics { padding-left: 4px; } }
+
+      /* more tracks toggle */
+      .more-toggle {
+        display: flex; align-items: center; gap: 16px; width: 100%;
+        margin-top: 30px; padding: 18px 6px;
+        background: transparent; border: none;
+        border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft);
+        color: var(--ink); font-family: var(--serif); font-weight: 700;
+        font-size: 1.02rem; letter-spacing: 0.3em; text-align: left; cursor: pointer;
+        transition: background 0.25s;
+      }
+      .more-toggle:hover { background: var(--accent-soft); }
+      .more-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+      .more-toggle .cnt {
+        margin-left: auto; font-family: var(--sans); font-weight: 300;
+        font-size: 0.8rem; letter-spacing: 0.16em; color: var(--ink-dim); white-space: nowrap;
+      }
+      .more-toggle .chev { flex: none; width: 14px; height: 14px; transition: transform 0.3s; }
+      .more-toggle .chev path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .more-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
+      .more-rows[hidden] { display: none; }
+
+      /* writing sub-sections: 手记随笔 / 成篇 */
+      .subhead.major {
+        font-size: clamp(1.2rem, 3vw, 1.45rem); letter-spacing: 0.36em; margin-top: 60px;
+      }
+      .subhead.major::before { content: ""; flex: none; width: 10px; height: 10px; background: var(--accent); }
+      .subhead.major:first-of-type { margin-top: 0; }
+
+      /* 手记随笔：点击展开全文 */
+      .notes { border-top: 1px solid var(--line-soft); }
+      .note { border-bottom: 1px solid var(--line-soft); }
+      .note-head {
+        display: flex; align-items: baseline; gap: 20px; width: 100%;
+        padding: 20px 6px; background: transparent; border: none; cursor: pointer;
+        color: var(--ink); font-family: inherit; text-align: left;
+        transition: background 0.25s, padding-left 0.25s;
+      }
+      .note-head:hover { background: var(--accent-soft); padding-left: 14px; }
+      .note-head:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+      .note-head .idx { font-family: var(--serif); font-size: 0.8rem; color: var(--faint); letter-spacing: 0.15em; flex: none; width: 2.2em; }
+      .note-head .ttl { font-family: var(--serif); font-weight: 700; font-size: clamp(1.05rem, 2.6vw, 1.35rem); letter-spacing: 0.06em; }
+      .note-head[aria-expanded="true"] .ttl { color: var(--accent); }
+      .note-head .meta { margin-left: auto; font-size: 0.85rem; color: var(--ink-dim); letter-spacing: 0.12em; white-space: nowrap; }
+      .note-head .chev { flex: none; width: 14px; height: 14px; align-self: center; margin-left: 2px; transition: transform 0.3s; }
+      .note-head .chev path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .note-head[aria-expanded="true"] .chev { transform: rotate(180deg); }
+      .note-body[hidden] { display: none; }
+      .note-text {
+        padding: 4px 6px 36px calc(2.2em + 26px); max-width: 48em;
+        font-family: var(--serif); font-weight: 600; font-size: 1rem;
+        line-height: 2.05; letter-spacing: 0.05em;
+      }
+      .note-text p { margin: 0; }
+      .note-text p + p { margin-top: 1.5em; }
+      @media (prefers-reduced-motion: reduce) {
+        .note-head, .note-head .chev { transition: none; }
+      }
+
+      /* plain item lists */
+      .items { display: grid; grid-template-columns: 1fr 1fr; gap: 0 56px; }
+      .item { padding: 26px 6px 24px; border-top: 1px solid var(--line-soft); }
+      .item h3 { font-family: var(--serif); font-weight: 700; font-size: 1.12rem; letter-spacing: 0.14em; margin: 0 0 10px; }
+      .item h3::before { content: "— "; color: var(--accent); }
+      .item p { margin: 0; color: var(--ink-dim); font-size: 0.94rem; letter-spacing: 0.04em; }
+
+      /* interests */
+      .int-row { display: flex; gap: 26px; padding: 20px 6px; border-bottom: 1px solid var(--line-soft); align-items: baseline; }
+      .int-row .cat { font-family: var(--serif); font-weight: 700; letter-spacing: 0.3em; font-size: 0.98rem; flex: none; width: 7.5em; }
+      .int-row .vals { color: var(--ink-dim); font-size: 0.95rem; letter-spacing: 0.06em; }
+      .int-row .vals b { color: var(--ink); font-weight: 500; }
+
+      /* ink band */
+      .inkband { margin-top: clamp(80px, 12vh, 130px); position: relative; overflow: hidden; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); }
+      .inkband img { width: 100%; height: clamp(200px, 34vh, 340px); object-fit: cover; opacity: 0.85; }
+      .inkband .cap {
+        position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+        font-family: var(--serif); font-weight: 900; letter-spacing: 0.6em; text-indent: 0.6em;
+        font-size: clamp(1rem, 3vw, 1.5rem); color: rgba(240, 238, 233, 0.92);
+        text-shadow: 0 2px 22px rgba(0, 0, 0, 0.8);
+      }
+
+      /* quotes wall */
+      .quotes { padding-bottom: 10px; }
+      .quote {
+        padding: clamp(30px, 5vh, 46px) 6px; border-bottom: 1px solid var(--line-soft);
+        cursor: pointer; transition: background 0.25s; position: relative;
+      }
+      .quote:hover { background: var(--accent-soft); }
+      .quote .qn { font-family: var(--serif); font-size: 0.8rem; color: var(--accent); letter-spacing: 0.25em; display: block; margin-bottom: 12px; }
+      .quote p {
+        margin: 0; font-family: var(--serif); font-weight: 900;
+        font-size: clamp(1.55rem, 5.4vw, 3rem); line-height: 1.55; letter-spacing: 0.05em;
+      }
+      .quote:nth-child(even) { text-align: right; }
+      .quote:nth-child(even) .qn { text-align: right; }
+      .quotes-hint { font-size: 0.75rem; color: var(--faint); letter-spacing: 0.3em; margin-top: 18px; }
+
+      /* 随机一刀 */
+      .lot { border: 1px solid var(--line-soft); background: var(--panel); padding: 26px 28px 30px; margin-bottom: 10px; }
+      .lot-top { display: flex; align-items: center; gap: 16px; }
+      .lot-tag { font-family: var(--serif); font-weight: 700; font-size: 0.72rem; letter-spacing: 0.34em; color: var(--accent); }
+      .lot-btn {
+        margin-left: auto; background: transparent; border: 1px solid var(--line); color: var(--ink);
+        font-family: var(--serif); font-weight: 700; font-size: 0.95rem; letter-spacing: 0.3em;
+        padding: 10px 18px 10px 22px; cursor: pointer; transition: border-color 0.25s, color 0.25s, background 0.25s;
+      }
+      .lot-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+      .lot-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+      .lot-quote {
+        margin: 24px 0 0; font-family: var(--serif); font-weight: 900;
+        font-size: clamp(1.7rem, 5.6vw, 3.2rem); line-height: 1.5; letter-spacing: 0.05em; cursor: pointer;
+      }
+      .lot-quote.drawn { animation: lotIn 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+      @keyframes lotIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+      .lot-hint { margin: 14px 0 0; font-size: 0.78rem; color: var(--faint); letter-spacing: 0.22em; }
+
+      /* 随笔盲盒 */
+      .essay-tools { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin: 2px 0 18px; }
+      .blind-btn {
+        background: transparent; border: 1px solid var(--line); color: var(--ink);
+        font-family: var(--serif); font-weight: 700; font-size: 0.92rem; letter-spacing: 0.26em;
+        padding: 9px 16px 9px 20px; cursor: pointer; transition: border-color 0.25s, color 0.25s, background 0.25s;
+      }
+      .blind-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+      .blind-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+      .blind-status { font-size: 0.8rem; color: var(--ink-dim); letter-spacing: 0.16em; }
+      .note { scroll-margin-top: 84px; }
+
+      /* 音乐手记位 */
+      .hand-note { font-size: 0.78rem; color: var(--faint); letter-spacing: 0.16em; font-weight: 300; }
+
+      /* 逐字出场动画：手记 / 命签 / 词典共用 */
+      .chars .ch { display: inline-block; opacity: 0; }
+      .chars.play .ch { animation-fill-mode: both; animation-delay: var(--d, 0ms); }
+      .chars.play.v-fade .ch { animation-name: chFade; animation-duration: 0.55s; animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1); }
+      .chars.play.v-blur .ch { animation-name: chBlur; animation-duration: 0.6s; animation-timing-function: ease-out; }
+      .chars.play.v-type .ch { animation-name: chType; animation-duration: 0.1s; animation-timing-function: steps(1, end); }
+      .chars.play.v-glitch .ch { animation-name: chGlitch; animation-duration: 0.45s; animation-timing-function: linear; }
+      .chars.play.v-slide .ch { animation-name: chSlide; animation-duration: 0.5s; animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1); }
+      .chars.play.v-pop .ch { animation-name: chPop; animation-duration: 0.55s; animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1); }
+      .chars.play.v-wave .ch { animation-name: chWave; animation-duration: 0.6s; animation-timing-function: ease-out; }
+      @keyframes chFade { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes chBlur { from { opacity: 0; filter: blur(6px); transform: scale(1.05); } to { opacity: 1; filter: blur(0); transform: scale(1); } }
+      @keyframes chType { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes chGlitch {
+        0% { opacity: 0; transform: translate(0, 0); }
+        15% { opacity: 1; transform: translate(-2px, 1px); }
+        30% { transform: translate(2px, -1px); }
+        45% { transform: translate(-1px, 0); }
+        60% { transform: translate(1px, 1px); }
+        100% { opacity: 1; transform: translate(0, 0); }
+      }
+      @keyframes chSlide { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: translateX(0); } }
+      @keyframes chPop {
+        0% { opacity: 0; transform: translateY(6px) scale(0.6); }
+        60% { opacity: 1; transform: translateY(-2px) scale(1.12); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      @keyframes chWave {
+        0% { opacity: 0; transform: translateY(8px); }
+        55% { opacity: 1; transform: translateY(-6px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .chars .ch { opacity: 1; animation: none !important; }
+      }
+
+      /* 止戈词典 */
+      .dict { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      .dict-card { border: 1px solid var(--line-soft); background: var(--panel); }
+      .dict-head {
+        display: flex; align-items: baseline; gap: 16px; width: 100%;
+        padding: 20px; background: transparent; border: none; cursor: pointer;
+        color: var(--ink); font-family: inherit; text-align: left; transition: background 0.25s;
+      }
+      .dict-head:hover { background: var(--accent-soft); }
+      .dict-head:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+      .dict-head .idx { font-family: var(--serif); font-size: 0.8rem; color: var(--faint); letter-spacing: 0.15em; flex: none; }
+      .dict-head .term { font-family: var(--serif); font-weight: 900; font-size: clamp(1.25rem, 3vw, 1.6rem); letter-spacing: 0.14em; }
+      .dict-head[aria-expanded="true"] .term { color: var(--accent); }
+      .dict-head .chev { flex: none; width: 14px; height: 14px; align-self: center; margin-left: auto; transition: transform 0.3s; }
+      .dict-head .chev path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .dict-head[aria-expanded="true"] .chev { transform: rotate(180deg); }
+      .dict-body[hidden] { display: none; }
+      .dict-body p {
+        margin: 0; padding: 2px 20px 24px;
+        font-family: var(--serif); font-weight: 600; font-size: 0.98rem;
+        line-height: 2.05; letter-spacing: 0.05em;
+      }
+      @media (max-width: 760px) { .dict { grid-template-columns: 1fr; } }
+      @media (prefers-reduced-motion: reduce) {
+        .lot-quote.drawn { animation: none; }
+        .dict-head, .dict-head .chev, .lot-btn, .blind-btn { transition: none; }
+      }
+
+      /* platforms */
+      .plats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 1px solid var(--line-soft); }
+      .plat { padding: 30px 26px 30px 6px; border-bottom: 1px solid var(--line-soft); }
+      .plat + .plat { border-left: 1px solid var(--line-soft); padding-left: 26px; }
+      .plat .pn { font-family: var(--serif); font-weight: 900; font-size: clamp(1.3rem, 3.4vw, 1.8rem); letter-spacing: 0.16em; }
+      .plat .pd { color: var(--ink-dim); font-size: 0.86rem; letter-spacing: 0.14em; margin-top: 8px; }
+      .plat .main-flag { color: var(--accent); font-size: 0.72rem; letter-spacing: 0.34em; display: block; margin-bottom: 10px; }
+
+      @media (max-width: 760px) {
+        /* 手机端触控与防溢出 */
+        .pbtn { width: 44px; height: 44px; }
+        .pbar { height: 16px; background: transparent; }
+        .pbar::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 3px; transform: translateY(-50%); background: var(--line); }
+        .pfill { top: 50%; bottom: auto; height: 3px; transform: translateY(-50%); }
+        .lyr-btn { padding: 9px 12px 9px 15px; }
+        .back-btn { padding: 10px 16px; }
+      }
+
+      footer { margin-top: clamp(80px, 12vh, 130px); border-top: 1px solid var(--line); }
+      .foot-in { max-width: 1180px; margin: 0 auto; padding: 54px 22px 70px; display: flex; flex-wrap: wrap; gap: 22px; align-items: baseline; }
+      .sign { font-family: var(--serif); font-weight: 600; font-style: italic; font-size: clamp(1.2rem, 3vw, 1.6rem); letter-spacing: 0.08em; }
+      .sign i { color: var(--accent); font-style: italic; }
+      .foot-name { margin-left: auto; font-family: var(--serif); font-weight: 900; letter-spacing: 0.4em; font-size: 1rem; color: var(--ink-dim); }
+
+      #toast {
+        position: fixed; left: 50%; bottom: 30px; transform: translate(-50%, 16px);
+        background: var(--ink); color: var(--bg); font-size: 0.82rem; letter-spacing: 0.2em;
+        padding: 10px 22px; z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.3s;
+      }
+      #toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+      .rv { opacity: 1; }
+      .rv.in { animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+      @keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+
+      /* ---------- 分层视图（选择题式导航） ---------- */
+      body.locked { overflow: hidden; height: 100dvh; }
+      .view {
+        position: fixed; left: 0; right: 0; top: 52px; bottom: 0;
+        overflow-y: auto; overflow-x: hidden;
+        background: var(--bg); z-index: 1;
+        -webkit-overflow-scrolling: touch;
+      }
+      .view[hidden] { display: none; }
+      .view.enter { animation: viewIn 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+      @keyframes viewIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+      .view .hero { min-height: calc(100svh - 52px); }
+      #view-home .inkband { margin-top: clamp(56px, 9vh, 96px); }
+      #view-home footer { margin-top: 0; }
+      .view-bar {
+        position: sticky; top: 0; z-index: 6;
+        background: var(--nav-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--line-soft);
+      }
+      .view-bar-in {
+        max-width: 1180px; margin: 0 auto; padding: 12px 22px;
+        display: flex; align-items: center; gap: 18px;
+      }
+      .back-btn {
+        background: transparent; border: 1px solid var(--line); color: var(--ink);
+        font-family: var(--serif); font-weight: 700; font-size: 0.9rem; letter-spacing: 0.22em;
+        padding: 8px 16px; cursor: pointer; flex: none;
+        transition: border-color 0.25s, color 0.25s, background 0.25s;
+      }
+      .back-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+      .back-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+      .view-title { font-family: var(--serif); font-weight: 900; font-size: 1.05rem; letter-spacing: 0.3em; }
+      .nav-home { background: none; border: none; padding: 0; cursor: pointer; color: inherit; }
+      .nav-home:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+      .nav-home-btn {
+        margin-left: auto; background: transparent; border: 1px solid var(--line); color: var(--ink-dim);
+        font-family: var(--serif); font-weight: 700; font-size: 0.82rem; letter-spacing: 0.24em;
+        padding: 7px 14px; cursor: pointer;
+        transition: border-color 0.25s, color 0.25s, background 0.25s;
+      }
+      .nav-home-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+      .nav-home-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+      /* 选择题 */
+      .hub { padding-top: clamp(56px, 9vh, 96px); }
+      .choice-q {
+        font-family: var(--serif); font-weight: 900; letter-spacing: 0.1em;
+        font-size: clamp(1.5rem, 4.6vw, 2.4rem); line-height: 1.5; margin: 0 0 34px;
+      }
+      .choice-q .qm { color: var(--accent); }
+      .choice-list { display: flex; flex-direction: column; border-top: 1px solid var(--line-soft); }
+      .choice {
+        display: flex; align-items: center; gap: 18px; width: 100%;
+        padding: 20px 8px; background: transparent; border: none;
+        border-bottom: 1px solid var(--line-soft);
+        color: var(--ink); font-family: inherit; text-align: left; cursor: pointer;
+        transition: background 0.25s, padding-left 0.25s;
+      }
+      .choice:hover { background: var(--accent-soft); padding-left: 16px; }
+      .choice:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+      .choice .ch-key {
+        flex: none; width: 2.1em; height: 2.1em;
+        display: inline-flex; align-items: center; justify-content: center;
+        border: 1px solid var(--line); color: var(--accent);
+        font-family: var(--serif); font-weight: 900; font-size: 0.95rem;
+      }
+      .choice:hover .ch-key { border-color: var(--accent); }
+      .choice .ch-main { font-family: var(--serif); font-weight: 700; font-size: clamp(1.1rem, 3vw, 1.45rem); letter-spacing: 0.1em; }
+      .choice .ch-sub { margin-left: auto; text-align: right; font-size: 0.82rem; color: var(--ink-dim); letter-spacing: 0.12em; }
+      .choice .ch-arrow { flex: none; color: var(--faint); font-size: 1rem; transition: color 0.25s, transform 0.25s; }
+      .choice:hover .ch-arrow { color: var(--accent); transform: translateX(3px); }
+      .group-body { padding-top: clamp(40px, 7vh, 72px); }
+      @media (max-width: 760px) {
+        .choice { flex-wrap: wrap; gap: 10px 14px; }
+        .choice .ch-sub { margin-left: 3.4em; text-align: left; width: 100%; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .view.enter { animation: none; }
+        .choice, .choice .ch-arrow { transition: none; }
+      }
+
+      /* ---------- 板块专属动态背景 ---------- */
+      :root { --fx-dim: rgba(233, 230, 223, 0.07); --fx-dim2: rgba(233, 230, 223, 0.04); --fx-star: rgba(233, 230, 223, 0.8); }
+      @media (prefers-color-scheme: light) {
+        :root { --fx-dim: rgba(23, 23, 26, 0.08); --fx-dim2: rgba(23, 23, 26, 0.045); --fx-star: rgba(23, 23, 26, 0.5); }
+      }
+      .view::before {
+        content: ""; position: fixed; top: 52px; right: 0; bottom: 0; left: 0;
+        z-index: 0; pointer-events: none; opacity: 0.55;
+        background-image: radial-gradient(1.5px 1.5px at 30% 40%, var(--fx-dim) 50%, transparent 51%);
+        background-size: 260px 260px;
+        animation: bgDrift 30s linear infinite alternate;
+      }
+      .view > *:not(.view-bar) { position: relative; z-index: 1; }
+      /* 首页 hub：暗流微粒 */
+      #view-home::before {
+        background-image:
+          radial-gradient(2px 2px at 20% 30%, var(--fx-star) 50%, transparent 51%),
+          radial-gradient(1.5px 1.5px at 70% 60%, var(--fx-dim) 50%, transparent 51%),
+          radial-gradient(600px 300px at 80% -5%, rgba(184, 64, 42, 0.1), transparent 70%),
+          radial-gradient(800px 500px at 10% 110%, var(--fx-dim2), transparent 70%);
+        background-size: 240px 240px, 320px 320px, 100% 100%, 100% 100%;
+        animation: bgDrift 26s linear infinite alternate;
+        opacity: 0.6;
+      }
+      /* 关于我：聚光灯 */
+      #view-sec-about::before {
+        background: radial-gradient(430px 430px at 32% 18%, var(--fx-dim), transparent 70%);
+        animation: bgSweep 11s ease-in-out infinite alternate;
+      }
+      /* 个人生涯：蓝图网格 */
+      #view-sec-career::before {
+        background-image:
+          linear-gradient(var(--fx-dim2) 1px, transparent 1px),
+          linear-gradient(90deg, var(--fx-dim2) 1px, transparent 1px);
+        background-size: 44px 44px;
+        animation: bgGrid 16s linear infinite;
+      }
+      /* 成篇：墨迹晕染 */
+      #view-sec-published::before {
+        background:
+          radial-gradient(360px 260px at 18% 24%, var(--fx-dim), transparent 70%),
+          radial-gradient(420px 300px at 82% 68%, var(--fx-dim2), transparent 70%),
+          radial-gradient(240px 180px at 60% 15%, rgba(184, 64, 42, 0.07), transparent 70%);
+        animation: bgPulse 9s ease-in-out infinite alternate;
+      }
+      /* 手记随笔：雨幕 */
+      #view-sec-diary::before {
+        background-image: repeating-linear-gradient(105deg, transparent 0 46px, var(--fx-dim2) 46px 47px, transparent 47px 92px);
+        background-size: 200% 200%;
+        animation: bgRain 2.6s linear infinite;
+        opacity: 0.5;
+      }
+      /* AI 音乐：音频波形 */
+      #view-sec-music::before {
+        background-image: repeating-linear-gradient(90deg, var(--fx-dim) 0 2px, transparent 2px 14px);
+        background-size: 100% 30%;
+        background-repeat: repeat-x;
+        background-position: bottom;
+        animation: bgEq 3.4s ease-in-out infinite alternate;
+        opacity: 0.5;
+      }
+      /* 我的技能：电路点阵 + 扫描线（冷灰蓝，与其它页的暖色光晕区分） */
+      #view-sec-skills::before {
+        background-image:
+          radial-gradient(2px 2px at 24% 28%, rgba(140, 165, 185, 0.35) 50%, transparent 51%),
+          radial-gradient(1.5px 1.5px at 68% 62%, rgba(140, 165, 185, 0.28) 50%, transparent 51%),
+          repeating-linear-gradient(0deg, transparent 0 26px, rgba(140, 165, 185, 0.06) 26px 27px),
+          repeating-linear-gradient(90deg, transparent 0 26px, rgba(140, 165, 185, 0.05) 26px 27px);
+        background-size: 190px 190px, 240px 240px, 100% 100%, 100% 100%;
+        animation: bgScan 9s linear infinite;
+        opacity: 0.6;
+      }
+      /* 路线设计：地图路线光迹 */
+      #view-sec-routes::before {
+        background-image:
+          linear-gradient(var(--fx-dim2) 1px, transparent 1px),
+          linear-gradient(90deg, var(--fx-dim2) 1px, transparent 1px),
+          repeating-linear-gradient(38deg, transparent 0 26px, rgba(184, 64, 42, 0.32) 26px 34px, transparent 34px 60px);
+        background-size: 56px 56px, 56px 56px, 220% 220%;
+        animation: bgRoute 13s linear infinite;
+      }
+      /* 趣味游玩活动路线：星空 */
+      #view-sec-routes-fun::before {
+        background-image:
+          radial-gradient(1.5px 1.5px at 15% 22%, var(--fx-star) 50%, transparent 51%),
+          radial-gradient(1px 1px at 42% 68%, var(--fx-star) 50%, transparent 51%),
+          radial-gradient(2px 2px at 78% 30%, var(--fx-star) 50%, transparent 51%),
+          radial-gradient(1px 1px at 88% 74%, var(--fx-star) 50%, transparent 51%),
+          radial-gradient(1.5px 1.5px at 60% 45%, var(--fx-star) 50%, transparent 51%);
+        background-size: 260px 260px;
+        animation: bgTwinkle 4s ease-in-out infinite alternate;
+      }
+      /* 兴趣爱好：火星余烬 */
+      #view-sec-interests::before {
+        background-image:
+          radial-gradient(3px 3px at 25% 90%, rgba(216, 110, 60, 0.5) 50%, transparent 51%),
+          radial-gradient(2px 2px at 55% 95%, rgba(184, 64, 42, 0.45) 50%, transparent 51%),
+          radial-gradient(2.5px 2.5px at 80% 92%, rgba(230, 150, 80, 0.4) 50%, transparent 51%);
+        background-size: 300px 300px, 380px 380px, 340px 340px;
+        animation: bgEmber 10s linear infinite;
+      }
+      /* 金句墙：烟雾 */
+      #view-sec-quotes::before {
+        background:
+          radial-gradient(600px 320px at 20% 30%, var(--fx-dim), transparent 70%),
+          radial-gradient(700px 380px at 85% 75%, var(--fx-dim2), transparent 70%);
+        animation: bgSmoke 18s ease-in-out infinite alternate;
+      }
+      /* 止戈词典：同心波纹扩散（半径呼吸，与成篇的墨晕脉冲区分） */
+      #view-sec-dict::before {
+        background: repeating-radial-gradient(circle at 82% 6%, var(--fx-dim2) 0 1px, transparent 1px 46px);
+        background-size: 120% 120%;
+        animation: bgRipple 6.5s ease-in-out infinite alternate;
+      }
+      /* 时间线动画：暖纸微光（米黄纸晕 + 细纸纹缓移，呼应动画本身的暖纸质感，仍压在暗底上） */
+      #view-timeline::before {
+        background-image:
+          radial-gradient(560px 340px at 16% 6%, rgba(217, 164, 65, 0.13), transparent 70%),
+          radial-gradient(680px 420px at 86% 98%, rgba(192, 69, 47, 0.1), transparent 70%),
+          repeating-linear-gradient(0deg, transparent 0 3px, rgba(233, 220, 190, 0.03) 3px 4px);
+        background-size: 100% 100%, 100% 100%, 100% 160px;
+        animation: bgPaper 13s ease-in-out infinite alternate;
+        opacity: 0.6;
+      }
+      /* 关注我：残阳横带（暖橙地平线缓升，与技能的冷色点阵、词典波纹区分） */
+      #view-sec-follow::before {
+        background:
+          radial-gradient(720px 300px at 50% 112%, rgba(198, 92, 38, 0.2), transparent 68%),
+          repeating-linear-gradient(0deg, transparent 0 34px, rgba(198, 92, 38, 0.05) 34px 35px);
+        background-size: 100% 100%, 100% 220px;
+        animation: bgSunset 11s ease-in-out infinite alternate;
+      }
+      /* 内耗游戏：回声波纹（自右下角一圈圈荡开，像念头被围攻；与词典的右上单点波纹区分） */
+      #view-game::before {
+        background:
+          repeating-radial-gradient(circle at 90% 94%, var(--fx-dim2) 0 1px, transparent 1px 52px),
+          repeating-radial-gradient(circle at 8% 6%, var(--fx-dim2) 0 1px, transparent 1px 74px);
+        background-size: 130% 130%, 150% 150%;
+        animation: bgEcho 7.5s ease-in-out infinite alternate;
+      }
+      @keyframes bgDrift { from { background-position: 0 0, 0 0, 0 0, 0 0; } to { background-position: 240px 120px, -320px 160px, 0 0, 0 0; } }
+      @keyframes bgSweep { from { transform: translateX(-5%); } to { transform: translateX(9%); } }
+      @keyframes bgGrid { from { background-position: 0 0, 0 0; } to { background-position: 44px 88px, 88px 44px; } }
+      @keyframes bgPulse { from { opacity: 0.35; transform: scale(1); } to { opacity: 0.65; transform: scale(1.05); } }
+      @keyframes bgRain { from { background-position: 0 -120px; } to { background-position: -32px 120px; } }
+      @keyframes bgEq { from { background-size: 100% 20%; } to { background-size: 100% 42%; } }
+      @keyframes bgRoute { from { background-position: 0 0, 0 0, 0 0; } to { background-position: 0 0, 0 0, 220px -150px; } }
+      @keyframes bgTwinkle { from { opacity: 0.25; } to { opacity: 0.6; } }
+      @keyframes bgEmber { from { background-position: 0 300px, 0 380px, 0 340px; } to { background-position: 30px -300px, -40px -380px, 20px -340px; } }
+      @keyframes bgSmoke { from { transform: translate(-2%, -1%) scale(1); } to { transform: translate(2%, 1%) scale(1.05); } }
+      @keyframes bgScan { from { background-position: 0 0, 0 0, 0 0, 0 0; } to { background-position: 190px 95px, -240px 120px, 0 52px, 52px 0; } }
+      @keyframes bgRipple { from { background-size: 100% 100%; opacity: 0.4; } to { background-size: 135% 135%; opacity: 0.62; } }
+      @keyframes bgSunset { from { background-position: 0 0, 0 0; opacity: 0.5; } to { background-position: 0 -18px, 0 -110px; opacity: 0.68; } }
+      @keyframes bgPaper { from { background-position: 0 0, 0 0, 0 0; } to { background-position: 0 0, 0 0, 0 160px; } }
+      @keyframes bgEcho { from { background-size: 118% 118%, 138% 138%; opacity: 0.4; } to { background-size: 148% 148%, 168% 168%; opacity: 0.62; } }
+      html.fx-off .view::before { animation: none !important; }
+
+      /* 时间线动画视图：大字标题在上，动画 iframe 填满余下高度、内部滚动，整页不溢出 */
+      #view-timeline:not([hidden]) { display: flex; flex-direction: column; overflow: hidden; }
+      #view-timeline > section {
+        flex: 1 1 auto; min-height: 0; width: 100%;
+        display: flex; flex-direction: column;
+        padding-top: clamp(26px, 4.5vh, 46px); padding-bottom: 20px;
+      }
+      .tl-frame {
+        flex: 1 1 auto; min-height: 0; margin-top: 22px;
+        border: 1px solid var(--line-soft); background: #171310;
+      }
+      .tl-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+      /* 内耗游戏视图：一句话介绍 + 开始按钮 */
+      .game-intro {
+        font-family: var(--serif); font-size: clamp(1.02rem, 3.4vw, 1.28rem);
+        line-height: 2.05; letter-spacing: 0.06em; max-width: 36em; margin: 4px 0 36px;
+      }
+      .game-start {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-height: 58px; padding: 16px 44px;
+        background: var(--accent); color: #fff; text-decoration: none;
+        font-family: var(--serif); font-weight: 900; font-size: 1.18rem; letter-spacing: 0.32em;
+        transition: background 0.25s;
+      }
+      .game-start:hover { background: #9c3520; }
+      .game-start:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+      @media (max-width: 760px) {
+        .game-start { display: flex; width: 100%; }
+        #view-timeline > section { padding-bottom: 14px; }
+        .tl-frame { margin-top: 16px; }
+      }
+
+      /* 板块标题：活动页式大字 + 入场 */
+      .view section.blk { padding-top: clamp(44px, 7vh, 84px); }
+      .view .blk-title { font-size: clamp(2.2rem, 6.5vw, 3.6rem); }
+      .view.enter .blk-head { animation: headIn 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+      .view.enter .blk-title { animation: titleIn 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+      .view.enter .subhead.major { animation: titleIn 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+      .view.enter .choice { animation: choiceIn 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+      .view.enter .choice:nth-child(2) { animation-delay: 0.06s; }
+      .view.enter .choice:nth-child(3) { animation-delay: 0.12s; }
+      .view.enter .choice:nth-child(4) { animation-delay: 0.18s; }
+      .view.enter .choice:nth-child(5) { animation-delay: 0.24s; }
+      .view.enter .choice:nth-child(6) { animation-delay: 0.3s; }
+      .view.enter .choice:nth-child(7) { animation-delay: 0.36s; }
+      .view.enter .choice:nth-child(8) { animation-delay: 0.42s; }
+      @keyframes headIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes titleIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+      @keyframes choiceIn { from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: none; } }
+      @media (prefers-reduced-motion: reduce) {
+        .view::before { animation: none !important; }
+        .view.enter .blk-head, .view.enter .blk-title, .view.enter .subhead.major, .view.enter .choice { animation: none !important; }
+      }
+
+      @media (max-width: 760px) {
+        .items { grid-template-columns: 1fr; }
+        .plats { grid-template-columns: 1fr; }
+        .plat + .plat { border-left: none; padding-left: 6px; }
+        .hero-vert { display: none; }
+        .hero-in { padding-top: 96px; }
+        .int-row { flex-direction: column; gap: 6px; }
+        .int-row .cat { width: auto; }
+        .row { flex-wrap: wrap; gap: 8px 16px; }
+        .row .meta { margin-left: 3.2em; text-align: left; }
+        .note-head { flex-wrap: wrap; gap: 8px 16px; }
+        .note-head .meta { margin-left: 3.2em; }
+        .note-text { padding-left: 6px; }
+        .blk-note { display: none; }
+        .nav-links a { padding: 6px 7px; }
+        .nav-in { flex-wrap: wrap; height: auto; padding-top: 8px; padding-bottom: 8px; row-gap: 2px; }
+        .nav-links { overflow-x: visible; flex-wrap: wrap; margin-left: 0; width: 100%; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        .grain, .hero-scroll::after { animation: none; }
+        .rv.in { animation: none; }
+        .row, .quote { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <div id="progress" aria-hidden="true"></div>
+
+    <nav aria-label="页面导航">
+      <div class="nav-in">
+        <button class="nav-name nav-home" id="navHome" type="button">止戈<i>．</i></button>
+        <button class="nav-home-btn" id="navHomeBtn" type="button">回到首页</button>
+      </div>
+    </nav>
+
+    <main>
+      <!-- HERO -->
+      <header class="hero">
+        <div class="hero-img" role="img" aria-label="灰调油画插画：雾气中临水而立的人物剪影，远处一抹残阳"></div>
+        <div class="hero-vert" aria-hidden="true">人性暗线拆解者</div>
+        <div class="hero-in">
+          <h1>止戈</h1>
+          <div class="hero-sub">人性暗线拆解者</div>
+          <p class="hero-quote"><span class="qm">「</span>因无所往而生其心。<span class="qm">」</span></p>
+          <div class="hero-tags" aria-label="身份标签">
+            <span>理性旁观者</span>
+            <span>情绪翻译者</span>
+            <span>人性暗线拆解者</span>
+            <span>人物关系结构分析者</span>
+            <span>玄学人格切片创作者</span>
+          </div>
+          <div class="hero-scroll" aria-hidden="true">向下</div>
+        </div>
+      </header>
+
+      <!-- 关于我 -->
+      <section class="blk wrap" id="about">
+        <div class="blk-head rv">
+          <span class="blk-no">壹 / 01</span>
+          <h2 class="blk-title">关于我</h2>
+        </div>
+        <p class="about-text rv">写人物与关系的结构化解读、玄学人格切片和自传故事。借影视与动漫人物拆解一种人性权力结构，最后把刀口转向自己——<b>人物拆解＋自我解剖</b>。</p>
+        <p class="about-side rv">不写温柔治愈。只拆结构：行为动机、权力关系、情绪隐喻——以及刀口落回自己身上的那一下。</p>
+      </section>
+
+      <!-- 个人生涯 -->
+      <section class="blk wrap" id="career">
+        <div class="blk-head rv">
+          <span class="blk-no">贰 / 02</span>
+          <h2 class="blk-title">个人生涯</h2>
+        </div>
+        <div class="rows rv">
+          <div class="row"><span class="idx">01</span><span class="ttl">4年青少年NLP培训讲师</span></div>
+          <div class="row"><span class="idx">02</span><span class="ttl">能量学讲师</span></div>
+          <div class="row"><span class="idx">03</span><span class="ttl">商业空间概念合伙人</span></div>
+          <div class="row"><span class="idx">04</span><span class="ttl">AI星推官</span></div>
+          <div class="row"><span class="idx">05</span><span class="ttl">心理学</span></div>
+          <div class="row"><span class="idx">06</span><span class="ttl">社会学</span></div>
+          <div class="row"><span class="idx">07</span><span class="ttl">曾祖母连锁奶茶店合伙人</span></div>
+          <div class="row"><span class="idx">08</span><span class="ttl">厚町便利店创始人</span></div>
+          <div class="row"><span class="idx">09</span><span class="ttl">清华商学院玄奘之路活动策划人</span></div>
+        </div>
+      </section>
+
+      <!-- 文笔合集 -->
+      <section class="blk wrap" id="writing">
+        <div class="blk-head rv">
+          <span class="blk-no">叁 / 03</span>
+          <h2 class="blk-title">文笔合集</h2>
+          <span class="blk-note">公众号「花天狂骨」</span>
+        </div>
+
+        <div class="subhead rv major">成篇</div>
+        <div class="notes rv">
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-energy" id="note-head-energy">
+              <span class="idx">01</span>
+              <span class="ttl">《能量概念》</span>
+              <span class="meta">全文</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-energy" role="region" aria-labelledby="note-head-energy" hidden>
+              <div class="note-text">
+                <p>能量概念</p>
+                <p>人的能量已经有很多种解释了，有人分层次，有人分深度。<br />你可以说情绪是能量，注意力也是能量，</p>
+                <p>能量的外放和内收，在情绪和注意力上可以很明确的察觉到不同。<br />过于外放包裹所有人的能量，大多时候自身难以寻找到“自己”。<br />而过于内收的能量，又特别容易产生内耗，以及形成“闭门造车”的自我保护的壁垒。</p>
+                <p>在这层关系的理解上，我们通常再把能量进行更为细致的分类，<br />慢慢就出现了能量的分层，和磁场的区别。</p>
+                <p>如果把能量按上面的逻辑来形容，能量是互通的，是流动的。<br />当一群人把目标都放在一个位置上的时候，所有人都为了那个项目去让出一部分心力和财力，所有人都为之而舍弃一些自身的利益以跟随场地去提升，并等待成为“势”的到来。</p>
+                <p>人群是一个很重要的磁场，我们称呼工作中的我们为牛马，是因为公司的目标大多时候并不是我们自己的目标。<br />我们盯着的都是那眼前的那块利润，我们其实都下意识的认为只有拿到手之后，我们才有本钱去寻找自己的“磁场”以及人群。</p>
+                <p>金钱的能量按上述解法来看，其实并不难理解，但是怎么抓在，怎么留住就成了方式的的问题。<br />首先金钱是流于人群的，而人群的能量大多时候只会在人群内部的磁场流动，对于外在的事物的流动性会降低，一方面出于信任，但是这个世界已经出现的很多形式的统一性，让内部的磁场流动出来，那就是“节日”。<br />节日其实本质来说并不是真实存在的，它的诞生是由群体定义进行扩大和宣传的，影响力也是能量流动起来的最大的时机。节日的统一性让大部分人获得相似的时间刻度，“假期”以及统一性的“意义”。<br />于是在相应于假期的闲暇时间，本该获得平静少有的寻找内观自己的时间，又被统一的牵扯开来。<br />群体会在统一刻度下，去寻求其他统一的拓展，而不是归还到个人。不管是家庭，友情，爱情，事业，兴趣，这些群体都在争抢心力的占比。其中既存在消耗的也有补充的，只不过大多时候我们认为的补充方式其实依旧是在拿自身的能量，作为交换。</p>
+                <p>慢慢就形成了一个无法避免和逃脱的局限，我们用有限的时间和自身的能量去换取金钱的能量，当我们认为金钱能等价治愈消耗的能量时，我们又已经失去了时间。<br />而时间是少有的不流通的“货币”。</p>
+                <p>灰</p>
+                <p>下一个篇章其实我好像想仔细聊一下关于中间的平静和所谓的灰度，我所感受到的形成方式和具体它带来的感受和相对应的能量，中庸之道我觉得是一件和特殊和相悖与现实的能量，以至于大多数都忽略了其中的存在以及力量。</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-yinguo" id="note-head-yinguo">
+              <span class="idx">02</span>
+              <span class="ttl">《因·果与运·势》</span>
+              <span class="meta">全文</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-yinguo" role="region" aria-labelledby="note-head-yinguo" hidden>
+              <div class="note-text">
+                <p>《因·果与运·势》</p>
+                <p>这两天在重看《钢铁侠》。</p>
+                <p>实在是想不懂当年这个小小的电影到底怎么转变成能承载漫威一整个宇宙重量的。</p>
+                <p>印象最深的还是那个山洞，光很暗。</p>
+                <p>那个男人穿着个小黑t，胸口嵌着一枚发光的圆环。他举起锤子，一下，又一下，砸在烧红的铁板上。</p>
+                <p>花火溅起来，落在他脸上。</p>
+                <p>洞外是拿枪的人，时间不多了。他和那个叫伊森的医生，正在赌一条新的出路。</p>
+                <p>他砸的，是自己的铠甲。</p>
+                <p>托尼·斯塔克。他被自己公司制造的武器炸伤，又被关进这个山洞里。</p>
+                <p>我一时间好像在这个画面里，同时看到了四个字。</p>
+                <p>因·果  运·势。</p>
+                <p>种什么因，得什么果。</p>
+                <p>这句话我们听过太多次。但真落到自己身上，又很容易只盯着果看。</p>
+                <p>为什么是我。为什么会这样。</p>
+                <p>托尼曾经拥有的东西很多。天赋，财富，斯塔克工业，掌声，信心，名望。</p>
+                <p>直到那些武器出现在绑架他的人手里。</p>
+                <p>过去，他站在展示台上，介绍它们的威力。现在，他也在它们的射程范围之内。</p>
+                <p>那些以前离他很远的后果，终于落到了自己身上。</p>
+                <p>因，是你种下的东西。你做过的选择，练过的本事，还有那些你以为不必再过问的事情。</p>
+                <p>果，是这些东西经过时间，与现实接壤之后，长成的样子。</p>
+                <p>他造出了武器，却没有掌握它往后的全部去向。</p>
+                <p>这多像我们随口的一句诋毁，和深夜里随口的一句发泄啊。</p>
+                <p>个人的因，掉进现实里。</p>
+                <p>然后，他遇见了伊森。</p>
+                <p>一个在同样处境里的人，救下他的命，又和他一起，把眼前有限的材料，拼成逃出去的可能。</p>
+                <p>这里面，我看到了运。</p>
+                <p>运，是能量与能量交汇，碰撞出来的火花。</p>
+                <p>一个人遇见另一个人，一项能力碰上一个需要。原本各自运行的东西，突然有了交集。</p>
+                <p>托尼的本事还在。伊森的帮助，让这些本事有了继续施展的机会。</p>
+                <p>有些相遇确实偶然。你准备过，也不意味着一定会遇见。</p>
+                <p>但机会来了，能不能接住，又会碰到那些早已种下的东西。</p>
+                <p>托尼过去积累的知识，没有在落难时消失。那些曾经用来制造武器的能力，现在被他拿来制造铠甲。</p>
+                <p>同样的本事，开始落向另一个方向。</p>
+                <p>一锤下去，全是花火。</p>
+                <p>很亮。</p>
+                <p>然后呢？</p>
+                <p>他还在继续打，继续炼。让一次次敲打落向同一个方向，眼神里空洞到只剩偶尔闪烁的光。</p>
+                <p>花火散了，东西还在。</p>
+                <p>伊森替他争取了时间，却没能和他一起离开。托尼穿着那副粗糙的铠甲，走出了山洞。</p>
+                <p>我好像感觉到那股随之而来的势了。</p>
+                <p>我理解的势，是能量覆盖的范围，也是它继续扩充、持续产生影响的力量。</p>
+                <p>个人有个人的势，场地也是。</p>
+                <p>运让交汇发生，势让影响延伸。</p>
+                <p>而托尼的势，早在他穿上铠甲之前，就已经存在。</p>
+                <p>斯塔克工业。他继承的资源，拥有的技术，公司的生产能力与合作关系，让他的一个想法能够被制造出来，送到很远的地方。</p>
+                <p>他个人的能力，在这个场地里被放大。</p>
+                <p>连同后果一起。</p>
+                <p>公司里有其他人的利益，也有他没有看见的交易。支撑他走到今天的环境，都有自己的惯性。</p>
+                <p>个人的势，处在场地的势里面。</p>
+                <p>你在借它发光，同时也在改变它，它能把你的能力推得很远，也能让你的疏忽越过你看得见的边界。</p>
+                <p>所以托尼接下来要面对的，还有他的技术，究竟会被谁使用，落到谁的身上。</p>
+                <p>他开始亲自介入那些曾经离自己很远的后果。</p>
+                <p>势没有因为他改变了想法，就立刻顺着他走。他得持续行动，处理阻力，重新决定自己的力量往哪里去。</p>
+                <p>铠甲是一次选择长成的果，又成为他往后行动的条件。</p>
+                <p>眼前的果，又会成为下一次的因。</p>
+                <p>看到这里，我又不由得想起自己。</p>
+                <p>我不断跳跃着，寻找新的工作。这个不合适，那个不喜欢。抱怨环境的不适配，哀怨人的不和谐。</p>
+                <p>而那个男人，正在一锤一锤地敲。</p>
+                <p>我好像也撞见过很多花火。新的想法，新的关系，新的可能。亮起来的时候，我总觉得自己终于找到了方向。</p>
+                <p>然后呢？</p>
+                <p>我又走了。</p>
+                <p>一次次相遇过去，我有没有留下什么？那些本来可以继续锤炼的能力，又被我放在了哪里？</p>
+                <p>我一直守着自己的一亩三分地，不愿妥协，不愿融入，也不愿先付出。</p>
+                <p>这里面有不合适，也有我自己的害怕。</p>
+                <p>我真的很怕伤害。</p>
+                <p>怕得要死。</p>
+                <p>怕了十几年，二十几年。敏感，多疑，又脆弱。我总想先确认自己不会受伤，再决定要不要往外走。</p>
+                <p>托尼造出铠甲，是为了走出山洞。</p>
+                <p>而我也有自己的创伤。</p>
+                <p>我连和外界接壤，都得先经过它的思辨。</p>
+                <p>我的“我”越重，我的场越小。</p>
+                <p>我把那些曾经保护自己的东西攥得太紧，有些可能性，也就被我一起挡在了外面。</p>
+                <p>环境有环境的条件，他人有他人的选择。我掌握不了所有的碰撞，也决定不了每一锤最终会落成什么。</p>
+                <p>但我能看见，自己有没有接住。有没有在火花散去以后，继续做下去。</p>
+                <p>内观和觉察，对我来说，也开始从这里出现。</p>
+                <p>看清自己现在的果，看清除了势以外的个人能力，究竟能够把握多远的未来，再一锤一锤的给它凿进去。</p>
+                <p>我还没有锤出什么像样的东西。</p>
+                <p>但我好像隐约感受到一点物件的形态了。</p>
+                <p>这个小世界的复杂和美好，单凭我这七零八落的文字，<br />又能承载多少。</p>
+                <p>我眼里的绚烂慢慢消散。</p>
+                <p>我想看看，那时不时闪过的花火，是不是也有燎原之势。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="subhead rv">代表文章</div>
+        <div class="rows rv">
+          <div class="row feature">
+            <span class="idx">01</span>
+            <span class="ttl">《斜阳》</span>
+            <span class="meta"><b>1万+</b> 阅读</span>
+          </div>
+          <div class="row">
+            <span class="idx">02</span>
+            <span class="ttl">《尤利娅别哭》</span>
+            <span class="meta"><b>1200</b> 阅读</span>
+          </div>
+          <div class="row">
+            <span class="idx">03</span>
+            <span class="ttl">《牛来》</span>
+            <span class="meta"><b>900+</b> 阅读</span>
+          </div>
+          <div class="row">
+            <span class="idx">04</span>
+            <span class="ttl">《心法你读完了，该上路了》</span>
+            <span class="meta"><b>500+</b> 阅读</span>
+          </div>
+          <div class="row">
+            <span class="idx">05</span>
+            <span class="ttl">《世界背景总纲·磨道盘》</span>
+            <span class="meta"><b>500+</b> 阅读</span>
+          </div>
+        </div>
+
+        <div class="subhead rv">自传系列 · 已定稿</div>
+        <div class="rows rv">
+          <div class="row"><span class="idx">01</span><span class="ttl">《电话》</span></div>
+          <div class="row"><span class="idx">02</span><span class="ttl">《剩饭》</span></div>
+          <div class="row"><span class="idx">03</span><span class="ttl">《支票》</span></div>
+          <div class="row"><span class="idx">04</span><span class="ttl">《朋友》</span></div>
+        </div>
+
+        <div class="subhead rv">散文诗</div>
+        <div class="notes rv">
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-mode" id="note-head-mode">
+              <span class="idx">01</span>
+              <span class="ttl">《模式》</span>
+              <span class="meta">全文</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-mode" role="region" aria-labelledby="note-head-mode" hidden>
+              <div class="note-text">
+                <p>模式</p>
+                <p>我记得之前讨论最多的就是生存模式老一辈为了生存吃了多少多少苦<br />但是现在很幸运，生活在和平年代，有机会学习提高，衣食住行温饱不用在意<br />我早些年总是会刷到说其实社会现在人已经可以满足自给自足的经济上的富足了<br />现在的钱更多是填补欲望的空洞<br />不管在老师课上，还是互联网都刷到过这样的话术</p>
+                <p>我总是很悲观的看待那些漫剧影视<br />我知道那些超越想象的 题材<br />是我们对于未知的遐想<br />以及希望的传递</p>
+                <p>生存模式之前我一直以为离我特别远<br />我这人啊<br />家境真不算贫困<br />优越却好像也没落到我心里头<br />我总感觉自己像是凤尾那块沾了点喜气的又脱离不掉的那撮毛<br />鸡群看着恶心<br />凤首也无暇关照<br />而我又依旧渴望着成为傲人夺目的桂冠<br />就这样挂着彩<br />斗志昂扬的萧然着</p>
+                <p>ai的速度太快了<br />贪婪的疯长<br />怠惰的蔓延<br />在傲慢的荒漠上驰骋<br />我们好像真的创造出了欲望本身</p>
+                <p>恐惧在尸骸上纵情声色<br />色欲雕塑着腐朽的皮囊<br />我眼底的那束光啊<br />你到底是谁的影子</p>
+                <p>愤怒吧<br />尽情咆哮吧</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="style-line rv">
+          <small>文风</small>
+          第一人称，冷静压抑锋利，短句断裂留白，保留攻击性。
+        </div>
+        <div class="subhead rv major">手记随笔</div>
+        <div class="essay-tools rv">
+          <button class="blind-btn" id="blindBtn" type="button">随机开一篇</button>
+          <span class="blind-status" id="blindStatus" aria-live="polite"></span>
+        </div>
+        <div class="notes rv" id="diaryNotes">
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-1" id="note-head-1">
+              <span class="idx">01</span>
+              <span class="ttl">愿来世</span>
+              <span class="meta">2018年12月28日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-1" role="region" aria-labelledby="note-head-1" hidden>
+              <div class="note-text">
+                <p>3.我们相信因果报应——世界上的好人和坏人都会得到他们不同的命运</p>
+                <p>1966年，美国心理学家梅尔文·勒纳和卡洛琳·西蒙斯开展了一项经典的研究，首次证明了这种想法的不好后果。在他们的实验中，一名女性学习者因为提供了错误的答案而受到电击的惩罚。随后，当其他女性参与者听说自己将再次看到她受到电击惩罚时，尤其是当她们知道自己无法帮助到这个可怜的被惩罚者时，她们会认为这个人是令人钦佩的。</p>
+                <p>来世不做意中人<br />不显人前<br />不念后人<br />百年孤寂燎原<br />断六识<br />不分七情<br />不得六欲<br />愿到阴阳逆乱时<br />再以魔血染青天<br />此世不平<br />我不灭</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-2" id="note-head-2">
+              <span class="idx">02</span>
+              <span class="ttl">寂</span>
+              <span class="meta">2018年12月28日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-2" role="region" aria-labelledby="note-head-2" hidden>
+              <div class="note-text">
+                <p>安静的可怕<br />仅剩下自己的呼吸声<br />和随处可见的污浊<br />慢慢的<br />整个房间被烟雾缭绕<br />再看不清镜子里的自己<br />还好灯还亮着<br />还好我知道那边有个门</p>
+                <p>我知道出了这个门<br />也只不过到了一个大一点的空间<br />这世界有着数不清的门<br />我们总想着去到更大的地方<br />拥有更多的东西<br />我们不断的碰撞破裂碰撞再破裂<br />直到停在某一处<br />可能是累了<br />也可能是到了尽头<br />又或者是自以为是的终点<br />谁知道呢</p>
+                <p>但<br />有没有一种可能<br />我们当初所拥有的那个空间<br />就已经是最后的终点了呢<br />我们只需要寻找到其他的空间<br />就可以拼凑成一个房子了</p>
+                <p>假设房子的面积是有限的<br />你的突破是不是霸占了别人的空间<br />直到有一天<br />整个房子又只剩你一人<br />那会的你<br />又会做何观想呢</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-3" id="note-head-3">
+              <span class="idx">03</span>
+              <span class="ttl">Christmas</span>
+              <span class="meta">2018年12月25日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-3" role="region" aria-labelledby="note-head-3" hidden>
+              <div class="note-text">
+                <p>昨天平安夜<br />我还好奇饺子怎么那么好心在家里没打炮<br />晚上才知道他又分手了<br />我应该厌恶这种感觉的<br />但在那一刻我好像有点放弃了<br />我好像因为前面父母的事<br />现在很多都开始不在意了<br />菱角在慢慢的磨平 消散<br />晚上去唱了歌<br />有个小女孩挺有意思的<br />可能是我的问题<br />所以也没太主动<br />付钱的时候还是加了微信<br />其实不知道加了有什么用处<br />总是有那么些小期待<br />这可能是社会慢慢变化成这样的起因吧<br />再往前几天<br />去舅舅家吃饭<br />聊了很多东西<br />我不知道是因为酒精上头还是商业互捧<br />他说了很多我很感动的话<br />我开始分不清我接收到的东西<br />是不是就是他表达的东西<br />种子法则<br />我越了解越觉得深刻<br />我解释不出口<br />但是我却好像隐约的理解到了<br />算是找到一条路了吧<br />种子法则 就是最高级的自私吧</p>
+                <p>现在有太多杂乱的信息<br />我有点履不清头绪<br />希望我记录下来的东西<br />在后面回看还能想得出来我所表达的含义<br />晚安 毫无意义的圣诞节</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-4" id="note-head-4">
+              <span class="idx">04</span>
+              <span class="ttl">梦魇</span>
+              <span class="meta">2018年12月23日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-4" role="region" aria-labelledby="note-head-4" hidden>
+              <div class="note-text">
+                <p>一大早做噩梦起来，据君心说应该是恐惧。恐惧朋友的去留，恐惧父母的压迫，恐惧临近的死亡，恐惧着恐惧本身。</p>
+                <p>然后发给我一篇某人关于梦境的记录。梦中有三者，梦境中的"我"，梦境中的"他"，还有"上帝"。"我"在里面肆意妄为，任由情绪欲望操控着。有时候甚至上帝也都投身进来阻止一些事情的发生。"他"由生活中的交际圈组成，人数不定但思维模式大多相符。他们的去留上帝都清楚，他们是一部分情绪欲望的引动者，一切当然也都无法阻止。上帝其实就是我，像文章中说的灵魂出窍的感觉。我即是那个造梦者，那个旁观者，也是局中人。</p>
+                <p>每次噩梦起来，都恍如隔世。那种代入感或许不是俩三根烟能浇灭的，但后面也不清楚那些刺骨的感受是如何消散掉的，却因为一些鸡皮蒜毛的事难受得死去活来。</p>
+                <p>可能真的因为，那也就只是个梦吧。</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-5" id="note-head-5">
+              <span class="idx">05</span>
+              <span class="ttl">Deadline</span>
+              <span class="meta">2018年12月31日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-5" role="region" aria-labelledby="note-head-5" hidden>
+              <div class="note-text">
+                <p>一九年的第一天<br />没收到来自家人的关注<br />可能因为我早已选择了另一条路<br />而他们也并不都那么无能<br />在失去的那一刻<br />人才能真正感受后悔<br />既然失去已成定局<br />那悲痛亦是必需承受的附赠品<br />选择的人<br />也应当独自背负<br />毫无非议<br />可这只是刚开始而已<br />就差点妥协<br />人生的选择<br />大多数看似毫不相干<br />却也在无意间编制天地<br />无处可逃<br />是命么？<br />我更相信命在手中<br />请坚定。</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-6" id="note-head-6">
+              <span class="idx">06</span>
+              <span class="ttl">重生</span>
+              <span class="meta">2019年1月2日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-6" role="region" aria-labelledby="note-head-6" hidden>
+              <div class="note-text">
+                <p>找个舒服的方式躺着<br />伴着温热的水温回想今天离别的情景<br />是体面吧<br />互相嫌弃的味道还挺新鲜的<br />依靠着社交本能完成最后的交际<br />也真是讽刺</p>
+                <p>空荡的房间里响起一首歌<br />他明白他明白我给不起<br />于是转身向山里走去<br />我挺喜欢这首歌的<br />只是没想到想起的会是你<br />也没想到<br />真的败给生活了</p>
+                <p>我在水里泡了很久<br />水温从温热到冰凉<br />可看起来并不凑效<br />起死回生终究是千古难题啊<br />我的情绪像被剥离在外了<br />如夜雨打在玻璃窗上<br />叮咚响</p>
+                <p>起身<br />开水冲刷略微僵硬的躯体<br />听着放水的声音<br />可真丑恶呢</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-7" id="note-head-7">
+              <span class="idx">07</span>
+              <span class="ttl">你好，陌生人</span>
+              <span class="meta">2019年1月4日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-7" role="region" aria-labelledby="note-head-7" hidden>
+              <div class="note-text">
+                <p>其实我不知道是什么力量驱使我在凌晨三点多想着吃零食<br />不知道是晚餐吃太早了还是因为刚和苍老师约了个会<br />我甚至不清楚为什么会是苍老师<br />出现的念头好像是哦好久不见了那就见一下吧<br />不管怎么说现在已经在清冷的零售店挑选着可能会浪费的零食</p>
+                <p>来的路上突然想起一个NBA老梗<br />球员问 你知道洛杉矶凌晨两点半的样子么<br />记者回答 是的那会我多半还没下班 有什么问题么<br />我不知道那个球员是谁更别说记者了<br />可就是在我脑子里不断的循环着这俩句话让我感到有点烦躁<br />伴着妖风甩了甩头<br />我试图把注意力放回到吃上面<br />走着走着我发现我看的每一个街道的角落都有个虚幻的身形融入环境<br />可能是流浪汉不羁的高中生还有怀揣梦想的画家等<br />他们低头做着各自手头的事<br />也不曾注意到我<br />其实我不认识他们也没看清是谁<br />可他们的肢体包括着装像是在述说着他们的经历</p>
+                <p>我挑了几包可能会吃的零食<br />太大包的就算了能省一点也就别太浪费<br />还挑了几瓶长相很好看的饮料<br />买单的时候我看见有人在偷饮料<br />天啊他的技术实怎么能那么差<br />抬头打算寻找一下这位大神祥貌上的槽点时他也很配合的看了我一眼</p>
+                <p>直到站在门口点上万宝路<br />感受死亡撕扯着喉咙的刺激感我才稍微缓过来一点<br />提着一袋不知道是什么的东西往回走<br />街上空荡荡的真好<br />这才是我所认识的布鲁克林啊</p>
+                <p>转身进入大楼的瞬间<br />我回头往路边看了一眼<br />路边散落着的垃圾仿佛跟着风起舞<br />一圈一圈的转<br />直到去到另一个我看不见的地方<br />那里<br />也真的没有人了。</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-8" id="note-head-8">
+              <span class="idx">08</span>
+              <span class="ttl">今日天晴 不如养狗</span>
+              <span class="meta">2019年1月5日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-8" role="region" aria-labelledby="note-head-8" hidden>
+              <div class="note-text">
+                <p>有时候我会突然想养些什么<br />可能是某种生物<br />可能是某种些情绪<br />再或者是某些世界角落的碎片<br />我喜欢看他们长大<br />从不堪一击到羽翼丰满<br />从无稽之谈到开天辟地<br />有趣的是当有些进展到后期的时候<br />已然分不清主仆</p>
+                <p>每当我登上高山之巅临海之崖<br />看着那道划分天地的分割线<br />那些讨厌的东西好像也随之缩小<br />还原成世界该有的模样<br />寂静且深邃</p>
+                <p>我还记得之前尤为喜爱的一句话<br />艺术家总是生于苦难且死于平凡<br />这一句不知道安慰了多少个秋冬的箴言<br />也终于轮到我体会其中酸楚<br />人类对于痛苦的感知总是超脱于一切<br />或许动物本就不该站起来制定规则</p>
+                <p>天地俩相隔<br />只有在四下无人的夜里<br />他们才能显得和谐<br />今日天晴<br />不如和我一起养条狗</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-9" id="note-head-9">
+              <span class="idx">09</span>
+              <span class="ttl">矛与盾</span>
+              <span class="meta">2019年1月5日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-9" role="region" aria-labelledby="note-head-9" hidden>
+              <div class="note-text">
+                <p>还记得那件让你恐惧的事么<br />心里一遍遍的安慰着没事<br />浑身却瘫软如烂泥一般<br />可能是第分手时的第一次体面<br />也可能是酒后涌上心头的不安</p>
+                <p>已经战胜的恐惧其实有很多<br />大多数我们已经忘了<br />不管选择面对还是逃避的我们<br />其实也都是在硬撑<br />可还是会那么一个瞬间<br />积压的恐惧会突破最后的防线<br />撕开你的胰脏<br />践踏着你的信仰<br />与其灵共舞</p>
+                <p>庆幸的是<br />在这一刻我们终于能摆脱肉体的负担<br />任由恐惧的带领<br />进入深渊<br />分离 瓦解 陨灭<br />最后孕育出的固执<br />也不再属于你</p>
+                <p>还是享受恐惧吧<br />看着他翩翩起舞的仪态<br />倒不如选择主动领舞<br />进入深渊走上一朝<br />你会明白我说的庆幸</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-10" id="note-head-10">
+              <span class="idx">10</span>
+              <span class="ttl">无良</span>
+              <span class="meta">2019年1月9日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-10" role="region" aria-labelledby="note-head-10" hidden>
+              <div class="note-text">
+                <p>每次和君心聊天都会感到轻松<br />不管话题有多沉重<br />甚至简单的早安晚安<br />都着一丝丝正能量的传递</p>
+                <p>近日来诸多不顺<br />情绪甚至影响到了周围的很多人<br />大多进入我朋友圈的人<br />都算是消耗品<br />能进来的人<br />都各自散发着自己强烈个性<br />他们的世界观或许和我并不兼容<br />但很庆幸的是他们做的是自己<br />或者是某类大众化的"代表"</p>
+                <p>昨天其中一朋友找我聊了会<br />也还是对待亲朋好友定义类的话题<br />我聊完之后我的分类好像又多了一层<br />从可同化阶段和不可同化<br />对待朋友<br />我只要有机会就会去冲击他们的世界观<br />并用其信息库内的东西去做<br />冲击来的更大一点<br />也相对直接<br />我喜欢看着他奔溃<br />然后扔在那个被遗忘的角落<br />但我更期待的是看到那不屈的灵魂<br />野草在哪都会是不同的<br />不管你是随风飘扬的野草<br />还是冒头的那一株</p>
+                <p>昨天我还和我舅吵了一波<br />也不算吵<br />单方面的被虐杀<br />吃饭的时候还一边委屈一边想<br />没俩分钟<br />转念一想就过去抱了一下<br />我喜欢这种碰撞<br />即便还不懂<br />即使还委屈<br />但是就是感谢</p>
+                <p>我所期待的朋友<br />天各一方各自安好<br />我希望大家都强大到能自我富足<br />自己就是一个世界<br />也是我所期待的中国<br />毕竟相比较起来<br />中国所传承的东西<br />足够了</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-11" id="note-head-11">
+              <span class="idx">11</span>
+              <span class="ttl">Something about you</span>
+              <span class="meta">2019年1月9日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-11" role="region" aria-labelledby="note-head-11" hidden>
+              <div class="note-text">
+                <p>今天要去见我爸了<br />好像对于离别已经没有太多的感触<br />我回来数了一下<br />狗狗 瑶瑶 祖母 李柯睿 父母离婚<br />笑笑 林子 沈悦<br />已经有太多人离开过了<br />我知道我会哭<br />也一定会想念<br />在没人认识的地方<br />电视剧里的剧情也都曾上演<br />不过这些都不会被外人知道<br />因为没有意义</p>
+                <p>我的钱包里一直存有笑笑的照片<br />那个差点被我推入悬崖的人<br />我经常谈起她<br />说的自己多无情多狠毒<br />我只是不想再失去了<br />就算是失去<br />我也希望是我自己的选择<br />这样我还保留在一起的回忆<br />这个平日里让我痛苦<br />但在最后放弃一刻它能变成一种力量<br />让我活着</p>
+                <p>我忘不掉爱过的人<br />也忘不掉伤害过我的人<br />没有什么由爱转恨 恨转爱的<br />就是留着它<br />然后逼着自己变得更优秀更独立<br />直到能够坦然面对这些关系</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-12" id="note-head-12">
+              <span class="idx">12</span>
+              <span class="ttl">七杀</span>
+              <span class="meta">2019年1月10日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-12" role="region" aria-labelledby="note-head-12" hidden>
+              <div class="note-text">
+                <p>其实昨天来看我爸发生了俩件意料外的事<br />早上送我的司机并不想我妈说的那样<br />他是我的表哥<br />我之前一直不知道<br />我只了解是我爸那个村里某某<br />所以他们关系挺好<br />一路上我还叫他叔叔<br />直到到了医院我爸说还有个侄子要过来<br />？<br />还有个？<br />然后我大表哥来了<br />其实我一直也没怎么把他往表哥方面想<br />在我爸生病之前<br />他和我爸长的真的差不多<br />昨天问他多大<br />他说他42了<br />比我爸小10岁<br />真的头疼</p>
+                <p>晚上出去吃饭<br />又来了俩个表姐还有个表哥<br />吃饭时也和我爸发生了点口角<br />也是意料之中的事情<br />餐桌上他说我回来也一直没叫一声<br />说他生病了我也不和他多聊天</p>
+                <p>另一件意料之外的<br />是我从几个表哥表姐那感受到的情绪<br />大前天我去看我爷爷的时候<br />和我舅也发生了争执<br />我妈那家里面的人<br />都对我爷爷的身体状况有着不一样的表现方式<br />哪怕是我大舅<br />也变得脆弱<br />但他们情绪之浓烈我也都能感受<br />而我最为佩服的小舅<br />情绪倾向的却是另一方面<br />是他的公司<br />其实这倒还好<br />真正我感到不舒服的地方<br />是他在家房中间摆了个大佛<br />来一个人就拉去拜一拜<br />看他拜的样子真可笑<br />拜完出来就和我说教<br />说我所做什么心理辅导是垃圾<br />说我跟的团队是坑钱什么之类的<br />也说我没有文凭所以没有资格<br />还拿教训我的话语去教训他的小孩<br />他很自豪的说自培育了多少的小孩<br />然后转过来说我<br />他其中还有一句话很有意思<br />他说你现在该做的是赚钱<br />他才是应该有时间做梦的人</p>
+                <p>我其实承认他其中的一些是有道理<br />梦想不付诸行动是为空谈<br />我争辩的自然也不是这些通俗易懂的东西<br />既然不想看破<br />那就只有杀破<br />我见朱雀多萧杀<br />竹雨落时<br />正好登山<br />适合杀人.</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-13" id="note-head-13">
+              <span class="idx">13</span>
+              <span class="ttl">秋叶黄</span>
+              <span class="meta">2019年1月14日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-13" role="region" aria-labelledby="note-head-13" hidden>
+              <div class="note-text">
+                <p>今天因为一些其妙的机缘<br />又来到了这个地方<br />这个我曾为之疯狂的地方<br />虽为疯狂<br />可在心底好像一直有一些抵触<br />我之前一直都没仔细想过<br />因为停车？<br />因为乱？<br />因为偏远？<br />我想今天我可能找到了答案</p>
+                <p>在这鱼龙混杂的深处有俩条街<br />街上的店铺无一不是艺术<br />油画素描国画插画<br />简直就是艺术家的国度<br />我迫不及待的冲进去<br />享受着灵魂随之波动的刺激<br />我低下头开始寻找<br />做好被天文数字所惊吓的准备<br />看到的却是特价三十<br />十元零基础教学包会<br />荒唐 可笑<br />我转身离开<br />路过一家家满目疮痍的繁华<br />却不敢停留太久<br />他们问的都是学画么包会<br />没有人在意自己的作品<br />那些瘆人的期待<br />沦为催命符<br />压榨着我仅剩的力量</p>
+                <p>从街头到街尾不过百十来步<br />我看到有人亲手装扮着门面<br />可其作品却不尽人意<br />也看到过门口等待出世的大作<br />可牌子上却写着特价六十买二送一<br />我没看到巷子里有除了艺术之外的店铺<br />可有些奇怪的东西好像已悄然入侵</p>
+                <p>这不是我梦想中的国度<br />或者已经不是了<br />世俗的东西如果区分不开<br />被污染也只是时间的问题<br />我依旧抱有期待<br />期待艺术的独特性<br />人是救不了了<br />但艺术可以救人<br />我不认为自己懂艺术<br />但我懂一点黑暗<br />我看得见<br />感受得到<br />它不可能被抹杀<br />只是光明太弱了</p>
+                <p>道心通明<br />我看的便是我所相信的<br />那么我自然相信我所看到的<br />只要我相信<br />那么幻觉往往便是真实的<br />我身在黑暗<br />心向光明<br />有人说不作为即是犯罪<br />所以发发声<br />投名状已立<br />其他的就随风而去吧</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-14" id="note-head-14">
+              <span class="idx">14</span>
+              <span class="ttl">山海</span>
+              <span class="meta">2019年1月14日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-14" role="region" aria-labelledby="note-head-14" hidden>
+              <div class="note-text">
+                <p>这个世界上有疯子<br />有狂人<br />芸芸众生<br />还有蛮人</p>
+                <p>我见识过真正的疯狂<br />那一种侵蚀过后寸草不生的荒凉<br />无上的孤寂是其荣誉的勋章<br />可惜大多都选择了回归<br />沦为蛮人</p>
+                <p>狂人一生皆为战<br />无不攀之巅<br />无不填之海<br />舍与得是其自带的天赋<br />犹如上天眷顾之人<br />山路皆平 任君挑选</p>
+                <p>众生皆有梦<br />亦是所有的开端<br />只是看梦焚烧过后的形状<br />才知是疯还是狂<br />或者看着梦想<br />过着碌碌无为的一生</p>
+                <p>在被业火摧残后<br />所剩之余即是蛮人<br />已有资讯定型<br />不再开化<br />随波逐流</p>
+                <p>可笑疯子与天仅咫尺之间<br />却承受不起<br />狂人看似欲与天齐<br />却受困于天赋</p>
+                <p>众生反当其道<br />蛮人自怜</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-15" id="note-head-15">
+              <span class="idx">15</span>
+              <span class="ttl">半夏</span>
+              <span class="meta">2019年1月24日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-15" role="region" aria-labelledby="note-head-15" hidden>
+              <div class="note-text">
+                <p>世界上有多个我<br />我曾经看过一个关于薛定谔的解读<br />当你打开盒子的时候<br />世界分成了俩个<br />一个活着 一个死去<br />人们想超度的是那个死去的猫<br />却常忽略存在于眼前的美好<br />现在的很多个我<br />消散大半隐于虚空<br />我是存留之一<br />我杀了他们<br />为了唯一<br />这个世界是多变的<br />有些东西我只要一个</p>
+                <p>曾大梦一场<br />梦中偶遇<br />他专一 我多情<br />他喝点酒就多 我千杯不醉<br />他闻见烟味就头疼 我一天俩包烟<br />他是最暖最贴心的暖男<br />我是渣到要死的渣男<br />他是以前的我 我是现在的他<br />我现在安心的生活<br />他未曾出现过<br />每次伴着咖啡深夜写词<br />每一篇却还是关于你<br />都说爱隔山海 山海难平<br />可我不渡山海 又耐如何</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-16" id="note-head-16">
+              <span class="idx">16</span>
+              <span class="ttl">垃圾</span>
+              <span class="meta">2019年1月26日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-16" role="region" aria-labelledby="note-head-16" hidden>
+              <div class="note-text">
+                <p>好久不见<br />记得去年回来<br />我站在家的门口<br />心理素描着它最初的模样<br />当时那小小的三层楼里<br />埋葬着我全部的青春<br />它在我脑子里无比清晰的呈现着<br />可回望眼前的大楼<br />它也和我一样的冰冷<br />人都没变<br />可大家都默不作声<br />像嗓子发了炎<br />吐出来就变成浓痰<br />时光的长河似乎悄悄的带走了一些什么<br />花非花 雾非雾</p>
+                <p>我们长大了<br />房子也推了<br />曾经的勇士不再让我感到敬畏<br />星星之火也已经开始燎原<br />我看着曾笑骂着一起打闹的人<br />颤抖着递上家里的地址<br />说别回来时找不到路<br />我看着曾跟在身后的鼻涕虫<br />对我说你别给自己太多压力 还有我呢<br />我看着那遗弃的井布满蛛丝<br />看着那半死的老树摧枯拉朽<br />我发现抵不住的不是生活而是时间时<br />那种无力感让我愤怒<br />那种脆弱让我鄙夷<br />可我却依旧像个被吸干了的冰冰棒<br />萎缩在角落里<br />观望着大世的纸短情长<br />固执的妄想着世界能听我一次</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-17" id="note-head-17">
+              <span class="idx">17</span>
+              <span class="ttl">明了</span>
+              <span class="meta">2019年1月26日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-17" role="region" aria-labelledby="note-head-17" hidden>
+              <div class="note-text">
+                <p>刚刚那个我很奇怪<br />不是起床气<br />我好像在模仿着之前那个我<br />也好像在试图摧毁什么<br />听到楼下传来愤怒的吼叫<br />我却反而觉得心安<br />或许这是我同意回来的最根本的原因<br />我记得来时我妈说的那几句话<br />可好像又不是<br />再回想起昨天的聊天内容<br />剧本渐渐变得清晰起来<br />还是挺好的<br />起码证明<br />最后的不可控也被我隐藏了起来<br />世态炎凉<br />该道歉了。</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-18" id="note-head-18">
+              <span class="idx">18</span>
+              <span class="ttl">聊斋</span>
+              <span class="meta">2019年2月25日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-18" role="region" aria-labelledby="note-head-18" hidden>
+              <div class="note-text">
+                <p>今日上城<br />偶间遇人寻梦<br />尤似九幽深处白莲自开<br />苦不堪言<br />悲也 古者悬而窒<br />回程再遇弃人<br />一心向善亦招人嫌<br />低身轻叹世态炎凉<br />也罢 世事又何尝如意</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-19" id="note-head-19">
+              <span class="idx">19</span>
+              <span class="ttl">欲辨忘言</span>
+              <span class="meta">2019年2月27日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-19" role="region" aria-labelledby="note-head-19" hidden>
+              <div class="note-text">
+                <p>理智是最不理性得选择<br />情绪化是最本能的反应<br />我们却因为社会奇怪的习俗抛弃本能<br />学着理智成熟<br />人本就是动物<br />却意图区别于彼此<br />形成了复杂的社会性<br />保持兽性真的有区别么<br />一样爱彼此<br />一样延续生命<br />一样丑恶</p>
+                <p>那些穿上的皮囊何时能褪去<br />何时能坦然接受<br />可能才真正区分开来吧</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-20" id="note-head-20">
+              <span class="idx">20</span>
+              <span class="ttl">今日风起</span>
+              <span class="meta">2019年3月10日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-20" role="region" aria-labelledby="note-head-20" hidden>
+              <div class="note-text">
+                <p>这里接连下了几天的雨<br />我就做了多少个关于你的梦<br />我其实没发现外面在下雨<br />只是偶间听友人提起<br />才发现原来又过了几个秋</p>
+                <p>用绝对的炙热沸煮世间所遇的一切<br />再以冰水浇之<br />位于俩岸之间那半稠的血丝才显得香甜</p>
+                <p>咖啡和汉堡我买俩份<br />你的那份我先帮你吃了<br />等你来了我会再瘦下来的<br />我可能见不到你也没有关系<br />你的名字里那些不能说的秘密<br />都只是因为我相信<br />所以你也会在</p>
+                <p>曾听爱神降世<br />却遭恶紫夺朱</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-21" id="note-head-21">
+              <span class="idx">21</span>
+              <span class="ttl">夜深人憔悴</span>
+              <span class="meta">2019年3月12日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-21" role="region" aria-labelledby="note-head-21" hidden>
+              <div class="note-text">
+                <p>掌控是一种很舒服的状态<br />它赋予了大多数欲望养分使其壮大<br />从而创造出一片虚拟的无人之境<br />界线以内无人能敌<br />纵可赋予弱小之人一层皇帝的新衣<br />却又如此的不堪一击</p>
+                <p>真正的修行者<br />修的是自己的心<br />最终会修向绝对的自我<br />那便是绝对的骄傲<br />他们可以像佛宗的尊者<br />道门的圣人那般隐藏在火山周围<br />依靠着极少量的苔藓<br />甚至只需要清水便能活下来<br />然而骄傲的他们如何能够接受自己变成在夜幕下瑟瑟发抖的老鼠<br />越强大越不甘心<br />当永夜来临的时候<br />他们选择抵抗<br />抽出自己的剑刺向冥王<br />然后死去。</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-22" id="note-head-22">
+              <span class="idx">22</span>
+              <span class="ttl">无疆</span>
+              <span class="meta">2019年3月20日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-22" role="region" aria-labelledby="note-head-22" hidden>
+              <div class="note-text">
+                <p>随着时间的推移<br />我不再喜欢即将步入凛冬的秋凉<br />我常醒于永夜之初<br />回看四下空无一人的街<br />品尝着 消化着<br />待到黎明将至时<br />再沉沉睡去</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-23" id="note-head-23">
+              <span class="idx">23</span>
+              <span class="ttl">代沟</span>
+              <span class="meta">2019年3月28日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-23" role="region" aria-labelledby="note-head-23" hidden>
+              <div class="note-text">
+                <p>年龄不是差距<br />时代是我们的<br />当做穿越一样<br />穿越时空的分享会<br />学习和了解的目的是传承<br />融会贯通之后再演化成我们时代的特色<br />可是单纯表面的了解<br />会产生误解<br />变成一些错误的无效信息<br />真正的设身处地的体验思考<br />把他们拿过来<br />再塑金身</p>
+              </div>
+            </div>
+          </div>
+          <div class="note">
+            <button class="note-head" type="button" aria-expanded="false" aria-controls="note-body-24" id="note-head-24">
+              <span class="idx">24</span>
+              <span class="ttl">无我</span>
+              <span class="meta">2019年4月9日</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="note-body" id="note-body-24" role="region" aria-labelledby="note-head-24" hidden>
+              <div class="note-text">
+                <p>我不确定是否有人了解双重人格<br />在疯狂边缘踱步的痛苦<br />因为所谓的钥匙从来都不曾握在自己手中而创造出的<br />平衡者<br />也不过是随风飘荡的平头草罢了<br />人格分裂大多终其一生都为了一个自我而不断的消耗<br />直到无可避免的走向那虚伪的捷径<br />自我对于分裂来说<br />可能才是蒙蔽双眼的遮羞布吧<br />不过尽管如此<br />俩个世界交汇所制造的巨大漩涡<br />总归是最美的星河</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- AI 音乐 -->
+      <section class="blk wrap" id="music">
+        <div class="blk-head rv">
+          <span class="blk-no">肆 / 04</span>
+          <h2 class="blk-title">AI 音乐</h2>
+          <span class="blk-note">Suno 制作 · 已定稿</span>
+        </div>
+        <div class="rows rv" id="tracksShowcase"></div>
+        <button class="more-toggle rv" id="moreToggle" type="button" aria-expanded="false" aria-controls="moreTracks">
+          <span>更多作品</span>
+          <span class="cnt">14 首</span>
+          <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+        </button>
+        <div class="rows rv more-rows" id="moreTracks" hidden></div>
+      </section>
+
+      <!-- 我的技能 -->
+      <section class="blk wrap" id="skills">
+        <div class="blk-head rv">
+          <span class="blk-no">伍 / 05</span>
+          <h2 class="blk-title">我的技能</h2>
+        </div>
+        <div class="items rv">
+          <div class="item">
+            <h3>人性结构化解读</h3>
+            <p>行为动机、权力关系、情绪隐喻的拆解。</p>
+          </div>
+          <div class="item">
+            <h3>AI 创作</h3>
+            <p>Higgsfield AI 短视频、Suno AI 音乐制作。</p>
+          </div>
+          <div class="item">
+            <h3>双语营销物料</h3>
+            <p>宣传图、行程、报价展示，中英双语。</p>
+          </div>
+          <div class="item">
+            <h3>旅行预订专业</h3>
+            <p>邮轮预订（NCL / MSC / Princess）、团队游、行程单与酒店交通安排。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 路线设计 -->
+      <section class="blk wrap" id="routes">
+        <div class="blk-head rv">
+          <span class="blk-no">陆 / 06</span>
+          <h2 class="blk-title">路线设计</h2>
+          <span class="blk-note">慢节奏 · 不早起</span>
+        </div>
+        <div class="items rv">
+          <div class="item">
+            <h3>小团队出游路线设计</h3>
+            <p>2 天 1 夜行程规划。示例：Kaaterskill Falls 瀑布＋Rail Explorers 铁轨单车＋观星。</p>
+          </div>
+          <div class="item">
+            <h3>观星路线</h3>
+            <p>猎户座流星雨极大夜观测规划。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 趣味游玩活动路线 -->
+      <section class="blk wrap" id="routes-fun">
+        <div class="blk-head rv">
+          <span class="blk-no">柒 / 07</span>
+          <h2 class="blk-title">趣味游玩活动路线</h2>
+        </div>
+        <div class="items rv">
+          <div class="item">
+            <h3>主题式游玩路线</h3>
+            <p>铁轨单车、瀑布徒步、观星夜、小镇漫游的组合玩法。</p>
+          </div>
+          <div class="item">
+            <h3>慢节奏，不早起</h3>
+            <p>按「慢节奏、不早起」也能玩得尽兴的方式来组织——睡到自然醒，行程照样完整。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 兴趣爱好 -->
+      <section class="blk wrap" id="interests">
+        <div class="blk-head rv">
+          <span class="blk-no">捌 / 08</span>
+          <h2 class="blk-title">兴趣爱好</h2>
+        </div>
+        <div class="rv">
+          <div class="int-row"><span class="cat">天文</span><span class="vals">流星雨 · 暗夜地点 · <b>观星与夜空摄影</b></span></div>
+          <div class="int-row"><span class="cat">玄学</span><span class="vals">易经 / 道教 / 佛教 · 塔罗 · 卦象 · <b>元辰宫</b></span></div>
+          <div class="int-row"><span class="cat">动漫与游戏</span><span class="vals"><b>咒术回战</b> · 拳皇97 · 火影 · 海贼王</span></div>
+          <div class="int-row"><span class="cat">音乐</span><span class="vals">摇滚 · 中文说唱 · <b>AI 音乐制作</b></span></div>
+          <div class="int-row"><span class="cat">影视</span><span class="vals"><b>90 年代港片</b> · 科幻（Star Trek、生活大爆炸）</span></div>
+          <div class="int-row"><span class="cat">写作</span><span class="vals">自传 · 长篇小说<b>《白骨之海》</b></span></div>
+        </div>
+      </section>
+
+      <!-- 墨迹横幅 -->
+      <div class="inkband rv" aria-hidden="true">
+        <img src="inkband.webp" alt="" loading="lazy" />
+        <div class="cap">刀口向内</div>
+      </div>
+
+      <!-- 金句墙 -->
+      <section class="blk wrap quotes" id="quotes">
+        <div class="blk-head rv">
+          <span class="blk-no">玖 / 09</span>
+          <h2 class="blk-title">金句墙</h2>
+        </div>
+        <div class="lot rv">
+          <div class="lot-top">
+            <span class="lot-tag" id="lotTag">命签</span>
+            <button class="lot-btn" id="lotBtn" type="button">随机一刀</button>
+          </div>
+          <p class="lot-quote" id="lotQuote" role="button" tabindex="0" aria-label="抽中的金句，点击复制">刀未出鞘。</p>
+          <p class="lot-hint">抽中后，点句子即可复制。</p>
+        </div>
+        <div class="rv">
+          <div class="quote" data-q="钱杀不死我，但能践踏尊严。" role="button" tabindex="0" aria-label="复制金句：钱杀不死我，但能践踏尊严。"><span class="qn">金句 · 01</span><p>钱杀不死我，但能践踏尊严。</p></div>
+          <div class="quote" data-q="跪与站由我决定。" role="button" tabindex="0" aria-label="复制金句：跪与站由我决定。"><span class="qn">金句 · 02</span><p>跪与站由我决定。</p></div>
+          <div class="quote" data-q="迟到的救赎不是救赎。" role="button" tabindex="0" aria-label="复制金句：迟到的救赎不是救赎。"><span class="qn">金句 · 03</span><p>迟到的救赎不是救赎。</p></div>
+          <div class="quote" data-q="意义是处境与情绪碰撞的产物。" role="button" tabindex="0" aria-label="复制金句：意义是处境与情绪碰撞的产物。"><span class="qn">金句 · 04</span><p>意义是处境与情绪碰撞的产物。</p></div>
+          <div class="quote" data-q="因无所往而生其心。" role="button" tabindex="0" aria-label="复制金句：因无所往而生其心。"><span class="qn">金句 · 05</span><p>因无所往而生其心。</p></div>
+        </div>
+        <p class="quotes-hint rv">点任意一句 · 复制原文</p>
+      </section>
+
+      <!-- 止戈词典 -->
+      <section class="blk wrap" id="dict">
+        <div class="blk-head rv">
+          <span class="blk-no">拾 / 10</span>
+          <h2 class="blk-title">止戈词典</h2>
+        </div>
+        <div class="dict rv">
+          <div class="dict-card">
+            <button class="dict-head" type="button" aria-expanded="false" aria-controls="dict-body-1" id="dict-head-1">
+              <span class="idx">01</span>
+              <span class="term">因·果</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="dict-body" id="dict-body-1" role="region" aria-labelledby="dict-head-1" hidden>
+              <p>种什么因，得什么果。因是你种下的东西：做过的选择，练过的本事，还有那些你以为不必再过问的事情。果，是这些东西经过时间，与现实接壤之后，长成的样子。</p>
+            </div>
+          </div>
+          <div class="dict-card">
+            <button class="dict-head" type="button" aria-expanded="false" aria-controls="dict-body-2" id="dict-head-2">
+              <span class="idx">02</span>
+              <span class="term">运</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="dict-body" id="dict-body-2" role="region" aria-labelledby="dict-head-2" hidden>
+              <p>能量与能量交汇，碰撞出来的火花。一个人遇见另一个人，一项能力碰上一个需要。</p>
+            </div>
+          </div>
+          <div class="dict-card">
+            <button class="dict-head" type="button" aria-expanded="false" aria-controls="dict-body-3" id="dict-head-3">
+              <span class="idx">03</span>
+              <span class="term">势</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="dict-body" id="dict-body-3" role="region" aria-labelledby="dict-head-3" hidden>
+              <p>能量覆盖的范围，也是它继续扩充、持续产生影响的力量。运让交汇发生，势让影响延伸。</p>
+            </div>
+          </div>
+          <div class="dict-card">
+            <button class="dict-head" type="button" aria-expanded="false" aria-controls="dict-body-4" id="dict-head-4">
+              <span class="idx">04</span>
+              <span class="term">磁场</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="dict-body" id="dict-body-4" role="region" aria-labelledby="dict-head-4" hidden>
+              <p>人群是一个很重要的磁场。当一群人把目标放在一个位置上，所有人都为之让出一部分心力和财力，等待成为"势"的到来。</p>
+            </div>
+          </div>
+          <div class="dict-card">
+            <button class="dict-head" type="button" aria-expanded="false" aria-controls="dict-body-5" id="dict-head-5">
+              <span class="idx">05</span>
+              <span class="term">灰</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="dict-body" id="dict-body-5" role="region" aria-labelledby="dict-head-5" hidden>
+              <p>独立于外放与内收之外的第三种状态。中间的平静，灰度，中庸之道——一种特殊且相悖于现实的能量，大多数人都忽略了它的存在与力量。</p>
+            </div>
+          </div>
+          <div class="dict-card">
+            <button class="dict-head" type="button" aria-expanded="false" aria-controls="dict-body-6" id="dict-head-6">
+              <span class="idx">06</span>
+              <span class="term">牛马</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="dict-body" id="dict-body-6" role="region" aria-labelledby="dict-head-6" hidden>
+              <p>我们称呼工作中的我们为牛马，是因为公司的目标大多时候并不是我们自己的目标。</p>
+            </div>
+          </div>
+          <div class="dict-card">
+            <button class="dict-head" type="button" aria-expanded="false" aria-controls="dict-body-7" id="dict-head-7">
+              <span class="idx">07</span>
+              <span class="term">时间</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg>
+            </button>
+            <div class="dict-body" id="dict-body-7" role="region" aria-labelledby="dict-head-7" hidden>
+              <p>少有的不流通的"货币"。我们用有限的时间和自身的能量去换取金钱的能量，当我们认为金钱能等价治愈消耗的能量时，我们又已经失去了时间。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 关注我 -->
+      <section class="blk wrap" id="follow">
+        <div class="blk-head rv">
+          <span class="blk-no">拾壹 / 11</span>
+          <h2 class="blk-title">关注我</h2>
+        </div>
+        <div class="plats rv">
+          <div class="plat">
+            <span class="main-flag">主阵地</span>
+            <div class="pn">公众号「花天狂骨」</div>
+          </div>
+          <div class="plat">
+            <div class="pn">小红书</div>
+          </div>
+          <div class="plat">
+            <div class="pn">抖音</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 时间线动画：由导航脚本搬入独立视图 view-timeline（hub 第 7 选项 G） -->
+      <section class="blk wrap" id="timeline" aria-label="时间线动画：时间差，就是信息差">
+        <div class="blk-head rv">
+          <span class="blk-no">拾贰 / 12</span>
+          <h2 class="blk-title">时间差，就是信息差</h2>
+          <span class="blk-note">概念 2 + 3 · 赚钱的信息差 × 领头人</span>
+        </div>
+        <div class="tl-frame rv">
+          <iframe src="timeline.html" title="时间差，就是信息差 · 概念 2 + 3 时间线动画" loading="lazy"></iframe>
+        </div>
+      </section>
+
+      <!-- 内耗游戏：由导航脚本搬入独立视图 view-game（hub 第 8 选项 H） -->
+      <section class="blk wrap" id="nehgame" aria-label="内耗游戏：内耗情绪具象化">
+        <div class="blk-head rv">
+          <span class="blk-no">拾叁 / 13</span>
+          <h2 class="blk-title">内耗游戏</h2>
+          <span class="blk-note">内耗情绪具象化</span>
+        </div>
+        <p class="game-intro rv">写下一个纠缠你的念头，看五种声音如何围攻你；右下角‘放下手机’按钮从第一秒起就在。</p>
+        <div class="rv">
+          <a class="game-start" href="game.html" target="_blank" rel="noopener">开始游戏 →</a>
+        </div>
+      </section>
+
+      <footer>
+        <div class="foot-in">
+          <span class="sign">Take easy, my friend<i>.</i></span>
+          <span class="foot-name">止戈</span>
+        </div>
+      </footer>
+    </main>
+
+    <audio id="audioEl" preload="metadata"></audio>
+
+    <div id="toast" role="status" aria-live="polite">已复制</div>
+
+    <script>
+      /* 选择题式分层导航：把现有板块搬入三层视图（首页 hub → 分组 → 板块），内容与交互不变 */
+      (function () {
+        var main = document.querySelector("main");
+        if (!main) { return; }
+        document.body.classList.add("locked");
+        if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) { document.documentElement.classList.add("fx-off"); }
+
+        var hero = main.querySelector(".hero");
+        var inkband = main.querySelector(".inkband");
+        var footer = main.querySelector("footer");
+
+        function el(tag, cls, text) {
+          var e = document.createElement(tag);
+          if (cls) { e.className = cls; }
+          if (text !== undefined) { e.textContent = text; }
+          return e;
+        }
+        function makeView(id, title) {
+          var v = el("div", "view");
+          v.id = id;
+          v.setAttribute("hidden", "");
+          v.setAttribute("tabindex", "-1");
+          var bar = el("div", "view-bar");
+          var barIn = el("div", "view-bar-in");
+          var back = el("button", "back-btn", "← 返回");
+          back.type = "button";
+          back.setAttribute("data-back", "");
+          barIn.appendChild(back);
+          barIn.appendChild(el("span", "view-title", title));
+          bar.appendChild(barIn);
+          v.appendChild(bar);
+          main.appendChild(v);
+          return v;
+        }
+        function choiceBtn(c, i) {
+          var b = el("button", "choice");
+          b.type = "button";
+          b.setAttribute("data-go", c.go);
+          b.appendChild(el("span", "ch-key", c.key || "ABCDEFGH".charAt(i)));
+          b.appendChild(el("span", "ch-main", c.main));
+          if (c.sub) { b.appendChild(el("span", "ch-sub", c.sub)); }
+          var arrow = el("span", "ch-arrow", "→");
+          arrow.setAttribute("aria-hidden", "true");
+          b.appendChild(arrow);
+          return b;
+        }
+
+        /* 第一层：首页 hub（hero + 选择题 + 页脚） */
+        var viewHome = el("div", "view");
+        viewHome.id = "view-home";
+        viewHome.setAttribute("tabindex", "-1");
+        if (hero) { viewHome.appendChild(hero); }
+        var hub = el("div", "wrap hub");
+        var q = el("h2", "choice-q");
+        q.innerHTML = "你想先了解止戈的<span class=\"qm\">哪一面</span>？";
+        hub.appendChild(q);
+        var homeList = el("div", "choice-list");
+        [
+          { key: "A", main: "他这个人", sub: "关于我 / 个人生涯", go: "view-group-a" },
+          { key: "B", main: "他的文字", sub: "成篇 / 手记随笔", go: "view-group-b" },
+          { key: "C", main: "他的音乐", sub: "AI 音乐", go: "view-sec-music" },
+          { key: "D", main: "他的能力", sub: "我的技能 / 路线设计 / 趣味游玩活动路线 / 兴趣爱好", go: "view-group-d" },
+          { key: "E", main: "他的金句", sub: "金句墙 / 止戈词典", go: "view-group-e" },
+          { key: "F", main: "关注他", sub: "关注渠道", go: "view-sec-follow" },
+          { key: "G", main: "时间线动画", sub: "时间差，就是信息差", go: "view-timeline" },
+          { key: "H", main: "内耗游戏", sub: "内耗情绪具象化", go: "view-game" }
+        ].forEach(function (c, i) { homeList.appendChild(choiceBtn(c, i)); });
+        hub.appendChild(homeList);
+        viewHome.appendChild(hub);
+        if (inkband) { viewHome.appendChild(inkband); }
+        if (footer) { viewHome.appendChild(footer); }
+        main.appendChild(viewHome);
+
+        /* 第二层：分组视图（组内再出一道选择题） */
+        [
+          { id: "view-group-a", title: "他这个人", choices: [
+            { main: "关于我", sub: "人物拆解＋自我解剖", go: "view-sec-about" },
+            { main: "个人生涯", go: "view-sec-career" }
+          ] },
+          { id: "view-group-b", title: "他的文字", choices: [
+            { main: "成篇", sub: "已发布的完整文章", go: "view-sec-published" },
+            { main: "手记随笔", sub: "2018–2019 · Card Diary", go: "view-sec-diary" }
+          ] },
+          { id: "view-group-d", title: "他的能力", choices: [
+            { main: "我的技能", go: "view-sec-skills" },
+            { main: "路线设计", sub: "慢节奏 · 不早起", go: "view-sec-routes" },
+            { main: "趣味游玩活动路线", go: "view-sec-routes-fun" },
+            { main: "兴趣爱好", go: "view-sec-interests" }
+          ] },
+          { id: "view-group-e", title: "他的金句", choices: [
+            { main: "金句墙", sub: "点任意一句 · 复制原文", go: "view-sec-quotes" },
+            { main: "止戈词典", sub: "七个词条", go: "view-sec-dict" }
+          ] }
+        ].forEach(function (g) {
+          var v = makeView(g.id, g.title);
+          var body = el("div", "wrap group-body");
+          var list = el("div", "choice-list");
+          g.choices.forEach(function (c, i) { list.appendChild(choiceBtn(c, i)); });
+          body.appendChild(list);
+          v.appendChild(body);
+        });
+
+        /* 文笔合集拆分：成篇 / 手记随笔 */
+        var writing = document.getElementById("writing");
+        var diarySec = null;
+        if (writing) {
+          var kids = Array.prototype.slice.call(writing.children);
+          var start = -1;
+          kids.forEach(function (k, i) {
+            if (k.classList && k.classList.contains("subhead") && k.textContent.indexOf("手记随笔") !== -1) { start = i; }
+          });
+          if (start >= 0) {
+            diarySec = el("section", "blk wrap");
+            diarySec.id = "diary";
+            for (var j = start; j < kids.length; j++) { diarySec.appendChild(kids[j]); }
+          }
+        }
+
+        /* 第三层：板块内容视图（搬入现有板块，交互原样保留） */
+        [
+          { id: "view-sec-about", title: "关于我", node: document.getElementById("about") },
+          { id: "view-sec-career", title: "个人生涯", node: document.getElementById("career") },
+          { id: "view-sec-published", title: "成篇", node: writing },
+          { id: "view-sec-diary", title: "手记随笔", node: diarySec },
+          { id: "view-sec-music", title: "AI 音乐", node: document.getElementById("music") },
+          { id: "view-sec-skills", title: "我的技能", node: document.getElementById("skills") },
+          { id: "view-sec-routes", title: "路线设计", node: document.getElementById("routes") },
+          { id: "view-sec-routes-fun", title: "趣味游玩活动路线", node: document.getElementById("routes-fun") },
+          { id: "view-sec-interests", title: "兴趣爱好", node: document.getElementById("interests") },
+          { id: "view-sec-quotes", title: "金句墙", node: document.getElementById("quotes") },
+          { id: "view-sec-dict", title: "止戈词典", node: document.getElementById("dict") },
+          { id: "view-sec-follow", title: "关注我", node: document.getElementById("follow") },
+          { id: "view-timeline", title: "时间线动画", node: document.getElementById("timeline") },
+          { id: "view-game", title: "内耗游戏", node: document.getElementById("nehgame") }
+        ].forEach(function (s) {
+          if (!s.node) { return; }
+          var v = makeView(s.id, s.title);
+          v.appendChild(s.node);
+        });
+
+        /* 路由：逐层进入、逐层返回 */
+        var allViews = Array.prototype.slice.call(document.querySelectorAll(".view"));
+        var stack = ["view-home"];
+        function render() {
+          var cur = stack[stack.length - 1];
+          allViews.forEach(function (v) {
+            var on = v.id === cur;
+            if (on) { v.removeAttribute("hidden"); } else { v.setAttribute("hidden", ""); }
+            v.classList.toggle("enter", on);
+          });
+          var curEl = document.getElementById(cur);
+          if (curEl) { curEl.scrollTop = 0; }
+        }
+        function go(id) { if (id && document.getElementById(id)) { stack.push(id); render(); } }
+        function back() { if (stack.length > 1) { stack.pop(); render(); } }
+        function goHome() { stack = ["view-home"]; render(); }
+        document.addEventListener("click", function (ev) {
+          var t = ev.target;
+          while (t && t !== document) {
+            if (t.getAttribute && t.getAttribute("data-go")) { go(t.getAttribute("data-go")); return; }
+            if (t.hasAttribute && t.hasAttribute("data-back")) { back(); return; }
+            t = t.parentNode;
+          }
+        });
+        var navHome = document.getElementById("navHome");
+        var navHomeBtn = document.getElementById("navHomeBtn");
+        if (navHome) { navHome.addEventListener("click", goHome); }
+        if (navHomeBtn) { navHomeBtn.addEventListener("click", goHome); }
+        render();
+      })();
+    </script>
+
+    <script>
+      (function () {
+        var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        /* scroll progress */
+        var bar = document.getElementById("progress");
+        function onScroll(ev) {
+          var h = document.documentElement;
+          if (ev && ev.target && ev.target.classList && ev.target.classList.contains("view")) { h = ev.target; }
+          var max = h.scrollHeight - h.clientHeight;
+          bar.style.transform = "scaleX(" + (max > 0 ? h.scrollTop / max : 0) + ")";
+        }
+        document.addEventListener("scroll", onScroll, { passive: true, capture: true });
+        onScroll();
+
+        /* reveal on scroll */
+        var rvEls = document.querySelectorAll(".rv");
+        if (reduce || !("IntersectionObserver" in window)) {
+          rvEls.forEach(function (el) { el.classList.add("in"); });
+        } else {
+          var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+              if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+            });
+          }, { threshold: 0.12 });
+          rvEls.forEach(function (el) { io.observe(el); });
+        }
+
+        /* nav active state */
+        var links = document.querySelectorAll("#navLinks a");
+        var map = {};
+        links.forEach(function (a) { map[a.getAttribute("href").slice(1)] = a; });
+        if ("IntersectionObserver" in window) {
+          var nio = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+              if (e.isIntersecting && map[e.target.id]) {
+                links.forEach(function (a) { a.classList.remove("on"); });
+                map[e.target.id].classList.add("on");
+              }
+            });
+          }, { rootMargin: "-38% 0px -55% 0px" });
+          document.querySelectorAll("section.blk[id]").forEach(function (s) { nio.observe(s); });
+        }
+
+        /* AI 音乐：展示区 + 更多作品（单播放器，切歌自动停上一首） */
+        var SHOWCASE = [
+          { title: "《将夜》", src: "track-01.mp3", dur: 224, note: "别急着定义我，游戏才刚刚开始。" },
+          { title: "《今日风起》", src: "track-02.mp3", dur: 234, note: "两岸的风早已不同方向，可我还是习惯为你多留一份。" },
+          { title: "《末世男主没有异能》", src: "track-03.mp3", dur: 231, note: "我把崩塌伪装得那么像生活，难怪谁都没认出末世。" },
+          { title: "《墓铭》", src: "track-04.mp3", dur: 267, note: "你们随手刻下的恶言，终将成为这个时代的墓铭。" },
+          { title: "《什么都记得》", src: "track-05.mp3", dur: 198, note: "最残忍的不是遗忘，是我什么都记得，却再也回不去了。" },
+          { title: "《余烬》", src: "track-06.mp3", dur: 193, note: "他们终于看见我的时候，我已经只剩下一场足以燎原的余烬。" },
+          { title: "《长歌楚天碧》", src: "track-07.mp3", dur: 231, note: "世道黑白颠倒，权势轮流坐庄，可我偏不做案板上的鱼肉。" }
+        ];
+        var MORE = [
+          { title: "《水凉了》", src: "track-08.mp3", dur: 195, note: "水都凉了，我还在嘴硬，说自己早就不想你了。" },
+          { title: "《剥离 · The Unmaking》", src: "track-09.mp3", dur: 207, note: "当欲望、嫉妒与希望被层层剥去，最后剩下的，究竟是不是我？" },
+          { title: "《等雪落》", src: "track-10.mp3", dur: 197, note: "我在去年的冬天等雪落，却没发现你眼里的雨早已下过。" },
+          { title: "《花落的是我》", src: "track-11.mp3", dur: 378, note: "你从未辜负我的深情，因为我从未有勇气将它交到你手里。" },
+          { title: "《花落是我》", src: "track-12.mp3", dur: 282, note: "花落的是我，不是你；你有你的四季，我也该有我的余生。" },
+          { title: "《难安好》", src: "track-13.mp3", dur: 223, note: "愿你此去安好，至于我的难安，就不劳你知道了。" },
+          { title: "《两人份》", src: "track-14.mp3", dur: 214, note: "明明只剩一个人，我却还在按照两个人的重量生活。" },
+          { title: "《下个世纪再相聚》", src: "track-15.mp3", dur: 220, note: "倘若这一生注定走散，那就下个世纪，再好好相聚。" },
+          { title: "《相逢的时候》", src: "track-16.mp3", dur: 226, note: "原来不是相逢得太早，是那时的我还不懂拥有。" },
+          { title: "《也放过我自己》", src: "track-17.mp3", dur: 202, note: "我终于舍得放你走了，也终于肯放过那个不甘心的自己。" },
+          { title: "《再见了您嘞》", src: "track-18.mp3", dur: 237, note: "天堂太亮，地狱太吵，人间这一课，我他妈还没答完。" },
+          { title: "《Stuck in Yesterday》", src: "track-19.mp3", dur: 239, note: "昨天早已结束，而我却把我们困在了那一天。" },
+          { title: "《The Water's Gone Cold》", src: "track-20.mp3", dur: 218, note: "水凉了，回忆却还烫着，连一句舍不得都说得漫不经心。" },
+          { title: "《Well Then, Goodbye》", src: "track-21.mp3", dur: 348, note: "生死不过一场荒唐的告别，可这荒唐的人间，我还真有点舍不得。" }
+        ];
+        var LYRICS = {"《将夜》": "<p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Intro]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">我总是能爱到我爱的人<br />直到被消耗殆尽 有始有终<br />我也没法真的释放自己<br />那些无处安放的欲望<br />只好留到<br />天黑以后</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">等太阳慢慢退场<br />等街灯一盏盏亮<br />白天不敢承认的声音<br />开始在身体里回响</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">将夜<br />将夜<br />我无法期待坦荡的烈阳<br />它把每道裂缝照得太亮<br />入秋的晚霞才是开始<br />人们等黎明 等一个新生<br />可我的一天<br />从将夜开始</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">夜晚有最恒久的孤独<br />也容得下失控和沉默<br />人群散尽以后<br />我终于不用证明<br />自己应该<br />怎样活着</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Bridge]</span></p><p class=\"lyr-p\">他们总说<br />熬过去 天就亮了<br />可我等了太多天亮<br />才发现真正醒来的我<br />一直站在<br />太阳背后</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Breakdown]</span></p><p class=\"lyr-p\">别替我开灯<br />别把黑夜赶走<br />我好不容易<br />才听见自己</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Chorus]</span></p><p class=\"lyr-p\">将夜——<br />将夜——<br />我不要那坦荡的烈阳<br />照着我应该成为的模样<br />入秋的晚霞才是开始<br />就让所有沉默在夜里发烫<br />他们去等黎明<br />去等所谓新生<br />而我的一天——<br />从将夜开始</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Outro]</span></p><p class=\"lyr-p\">天还没亮<br />很好<br />今晚<br />才刚刚开始</p>", "《今日风起》": "<p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">这里接连下了几天的雨<br />我却一直没有留意<br />只是偶然听朋友提起<br />才发现窗外<br />又换了天气<br />这些天做了几个关于你的梦<br />醒来以后也没什么不同<br />日子照常往前走<br />回过头才发现<br />原来又过了几个秋</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">咖啡和汉堡我买了两份<br />你的那份我先替你吃了<br />等你哪天真的来了<br />我再慢慢<br />瘦下来好了<br />其实见不到你<br />好像也没有关系<br />反正这么多年<br />你一直住在<br />我没说出口的事情里</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">我曾把世间所谓的一切<br />放进最滚烫的水里<br />又用最冷的雨<br />一遍一遍浇熄<br />才发现隔着两岸<br />有些东西反而更清晰</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">我可能见不到你<br />也没有关系<br />关于你的名字<br />关于那些<br />不能说的秘密<br />我从来没有问过原因<br />也没有等一句证明<br />只是因为我相信<br />所以无论你在哪里<br />我都觉得<br />你也会在这里</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 3]</span></p><p class=\"lyr-p\">后来天气还是会变<br />雨停以后也会晴天<br />街边的店换了招牌<br />认识的人<br />也走远了一些<br />只是偶尔买东西的时候<br />还是会下意识拿两份<br />等走到门口才想起来<br />原来今天<br />你也不会出现</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Bridge]</span></p><p class=\"lyr-p\">曾听爱神降世<br />却遭恶紫夺朱<br />他们说故事总该有结局<br />可我偏偏没有等结局<br />我不是还在等你回来<br />也不是不肯离开<br />只是这个世界这么大<br />我替你留一个位置<br />又有什么关系</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Chorus]</span></p><p class=\"lyr-p\">我可能见不到你<br />真的没有关系<br />关于你的名字<br />关于那些<br />不能说的秘密<br />这么多年过去<br />我已经不再追问原因<br />只是因为我相信<br />所以即使隔着两个世界<br />隔着多少场风雨<br />今日风起<br />我还是会觉得<br />你也在这里</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Outro]</span></p><p class=\"lyr-p\">咖啡还是买了两份<br />你的那份<br />我先替你喝了</p>", "《末世男主没有异能》": "<p class=\"lyr-p\">《男主没有异能》</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Intro]</span></p><p class=\"lyr-p\">听说末世<br />是一片废墟接着一片废墟<br />风把门牌吹进下个街区<br />没有人知道该往哪里去</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">慌张的人挤在断墙下面<br />计算水和明天还剩几天<br />那些可怖又无知的远亲<br />隔着裂缝讨论谁更体面<br />我那时还算情绪稳定<br />能替所有人把坏消息说轻<br />直到某个平常的夜里<br />灯没有灭<br />我先没了声音</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">他们说你不是一直都很好吗<br />怎么忽然连笑也懒得回答<br />我把崩塌藏得那么像生活<br />难怪谁都没认出它</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">原来末世不是天塌<br />是情绪稳定的人先碎成渣<br />我被写成故事里的男主<br />可惜编剧没给我异能啊<br />我救不了你<br />也没救下我<br />只会把求救说成一句笑话<br />等所有的人逃出画面<br />我还在废墟里维持正常啊</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">清晨的新闻照常播报<br />说城里一切恢复得很好<br />人们跨过昨夜留下的人<br />赶着上班<br />没有一个迟到<br />那些远亲带着药和道理<br />教我如何坚强 如何忘记<br />像站在岸上纠正溺水的人<br />为什么换气<br />为什么失礼</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">我承认我也等过一道光<br />等谁推门说别再逞强<br />后来只等到一句<br />你不是主角吗<br />怎么会怕</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Bridge]</span></p><p class=\"lyr-p\">别等了<br />我真的不会飞<br />不能把死去的昨天追回<br />我连自己的名字<br />都从瓦砾里捡过几回<br />可最可怖的不是我无能<br />不是我没长出你们要的光辉<br />是所有人都知道我会碎<br />还坚持让我去救谁</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Chorus]</span></p><p class=\"lyr-p\">原来末世不是天塌<br />是情绪稳定的人被磨成渣<br />他们把幸存写成一种伟大<br />再把没撑住的人叫作代价<br />我不是故事里的男主<br />没有异能 也没有盔甲<br />当最后一面墙终于倒下<br />才看见废墟原来就是大家</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Outro]</span></p><p class=\"lyr-p\">听说末世<br />是一片又一片废墟拼接<br />我走近以后才认得<br />每一块<br />都曾经是我</p>", "《墓铭》": "<p class=\"lyr-p\">《墓铭》</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Intro]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Instrumental]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">你说人一生<br />该留下些什么<br />半夜留下的几句<br />把唾弃养成习惯<br />没寄出的那点温柔<br />睡在废弃的账号<br />等不到午后阳光<br />先被秋风吹散</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">屏幕不会爱你<br />也从来不恨你<br />它只是把一时<br />替我们撰成永恒</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus 1]</span></p><p class=\"lyr-p\">你以为墓铭<br />由生前的自己决定<br />可死后的第一场雨<br />洗不清半句曾经<br />有人收藏你的声音<br />有人传递你的恶意<br />我们活过的人生<br />只剩标签<br />自称对逝者认真<br />没熬过你的冬天<br />也替你盖棺定论</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">历史只要结论<br />不要完整的人<br />每一块失修的旧坟<br />被拖进时代的沉沦</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus 2]</span></p><p class=\"lyr-p\">你以为墓铭<br />你以为墓铭<br />还能替沉默的人澄清<br />时代只挑几句<br />拼成想要的曾经<br />有人补写你善意<br />有人替你修正罪名<br />可巨轮从白骨上驶过<br />谁会问你姓名</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Bridge]</span></p><p class=\"lyr-p\">别怪他傲慢<br />我们都戴过那副手套<br />站在别人的碑前<br />公道写得潦草<br />借沉默作证<br />再把偏见磨成了刃<br />没问过他的冬天<br />替他把一生<br />说教<br />今天你替人定罪<br />明天谁替你求饶<br />直到我们的喉咙<br />也被尘土封牢<br />才明白所谓辩解<br />不是没人听到<br />是他们从一开始<br />就只想要自己的<br />那套</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Chorus]</span></p><p class=\"lyr-p\">所以墓铭<br />不由死者决定<br />我们向黑夜扔出的傲<br />都在暗处生根成牢<br />时代巨轮压过白骨<br />谁也掀不起尘埃<br />若有一粒落进<br />后来人的眼睛<br />也会刺疼很久</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Outro]</span></p><p class=\"lyr-p\">你选择怎样回忆一生<br />早已确认<br />别人怎样念你<br />只有一粒尘埃<br />落在那里</p>", "《什么都记得》": "<p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">要怎么回忆一个人<br />从风景 回到发生<br />从那天走过的街灯<br />一直记到你的毛孔<br />先想起你的声音<br />再想起熟悉的气味<br />像旧照片套上滤镜<br />以为这样就能靠近</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">其实色调不用再暖<br />有些东西早已断层<br />再温柔的光<br />也照不热<br />没有你的空间</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">我越努力回忆一个人<br />越拼不回完整的我们<br />把遗忘的片段一块块填满<br />才发现缝隙越来越深<br />我记得声音<br />记得气味<br />记得你靠近时的体温<br />可当所有细节重新清晰<br />眼前只剩<br />眼前只剩<br />满目疮痍</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">后来照片越来越真<br />记忆却越来越陌生<br />我甚至记得你的眼神<br />却忘了我们怎么转身<br />那些没保存的片段<br />我一遍一遍补完整<br />直到故事终于连贯<br />才发现结局早就发生</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Chorus]</span></p><p class=\"lyr-p\">我越努力回忆一个人<br />越证明你已经不在我们<br />再暖的滤镜也盖不住裂痕<br />再完整的从前<br />也没有余温<br />我记得声音<br />记得气味<br />甚至记得你的毛孔<br />原来最残忍的不是遗忘<br />是我什么都记得<br />却再也<br />回不到其中</p>", "《余烬》": "<p class=\"lyr-p\">《余烬》</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Intro]</span></p><p class=\"lyr-p\">我不再写词<br />也不爱思考<br />泡面刚刚泡好<br />未来好像<br />也就这样了<br />好像也还好</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">每天醒来<br />走一样的街道<br />没有悲伤<br />也没有什么需要燃烧<br />以前满腔怒火<br />都说要传递<br />说我要燎原<br />让他们清醒<br />告诉他们<br />世界不该这样<br />可后来才知道<br />我做不到</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">可能我真正想要的<br />从来没有那么伟大<br />我只是想有一次<br />被谁看见吧</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">现在他们看见我了<br />怎么又开始害怕<br />别急着救我<br />光还没有死光啊<br />得让最后一点火<br />也烧成灰吧<br />等余烬亮起来<br />等余烬亮起来<br />夜才真正黑啊</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">我说的是实话<br />我的确想过他能帮我<br />甚至也许<br />正因为知道他能帮我<br />我才选了他<br />是不是很神奇<br />一个从没被看见的人<br />终于站进灯里<br />他们却开始<br />四处乱投医</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Bridge]</span></p><p class=\"lyr-p\">还不够<br />还不够<br />得杀死剩下的光<br />余烬才会在夜里发亮<br />灼烧<br />翻涌<br />再燎原<br />时间啊<br />再快一点</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Chorus]</span></p><p class=\"lyr-p\">现在你终于看见我了<br />怎么反而不敢看了<br />你们想扑灭的火<br />早就钻进灰下面了<br />跪下吧<br />尊贵的王<br />新衣一件一件脱光<br />让我看看<br />没有名字<br />没有冠冕<br />没有那身漂亮的伪装<br />你这副皮囊——<br />还能剩几两</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Outro]</span></p><p class=\"lyr-p\">我不再写词<br />不再爱思考<br />泡面已经凉了<br />未来就这样吧<br />……好像<br />也还好</p>", "《长歌楚天碧》": "<p class=\"lyr-p\">《换了姓氏》</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Intro]</span></p><p class=\"lyr-p\">排队。<br />低头。<br />往前走。<br />他们说井底有光，<br />于是所有人，<br />争着往下跳。</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">城里的人排着队<br />往那黑井里面挤<br />头顶漏下几片金光<br />就敢管这玩意叫黎明<br />高楼吞掉天际线<br />铁轨碾碎旧脚印<br />欲望往火里面添柴<br />烧到黑白都分不清<br />黑的——<br />他们说这是白的<br />假的——<br />他们说这是对的<br />跪久了开始赞美膝盖<br />瞎久了开始怀疑眼睛<br />小时候天还是蓝的<br />河里还有倒着的云<br />现在一声口号砸下来<br />几万人抢着交出脑筋<br />谁在喊？<br />谁在听？<br />谁把谎话念成圣经？<br />谁把脖子上的锁链<br />擦得锃亮<br />说这是黄金？</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Hook]</span></p><p class=\"lyr-p\">分！<br />继续分！<br />分完桌上的肉<br />再分死人留下的名<br />赢！<br />都说赢！<br />旗子换了一面<br />他们他妈只是——<br />换！了！姓！氏！<br />闭眼的人继续走<br />低头的人继续跪<br />你问这天下换了谁？<br />换了名字！<br />换了椅子！<br />换了姓氏！</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">有人端碗等着分羹<br />有人挨打还谢主隆恩<br />今天跪这个姓赵的<br />明天跪另一个姓孙<br />台上换人<br />台下换灯<br />门还是那一道门<br />你很懂事。<br />钥匙从左手交到右手<br />他们敲锣说——<br />天下翻身<br />翻个屁！<br />沉默叫作安稳<br />屈服叫作成熟<br />胆怯包装成识时务<br />麻木包装成有城府<br />活着教你别抬头<br />死了替你写痛苦<br />先教你闭嘴活着<br />再夸你死得有风骨<br />哈。<br />这戏演了几千年<br />台词居然还没换<br />一个人喊万岁<br />十万人跟着喊<br />等旧王倒在尘埃<br />新王坐上旧王的案<br />他们抢完他的皇冠<br />第一件事——<br />把它戴上！</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Bridge]</span></p><p class=\"lyr-p\">所以别再问<br />谁是好人<br />谁是坏人<br />先看看<br />谁拿着刀<br />谁跪着等<br />谁把你的沉默<br />写成他的许可<br />谁把你的恐惧<br />解释成——<br />你很懂事。</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Verse]</span></p><p class=\"lyr-p\">若你甘愿做案上鱼肉<br />那就等着他们下刀<br />今天割你的沉默<br />明天割你的骄傲<br />割掉眼睛<br />告诉你别看<br />割掉舌头<br />告诉你别喊<br />最后剩副空壳<br />他们还要拍着你肩膀——<br />说你活得真他妈体面！<br />可我不认！<br />我偏要睁眼<br />偏要记住颜色<br />偏要记住天空本来是蓝<br />草木本来是绿色<br />偏要问那高台之上<br />凭什么坐着那几个？<br />你们分你们的羹<br />我磨我的刀<br />你们唱你们的太平<br />我偏要唱得刺耳又难熬<br />你若只愿做案上的鱼肉——<br />那我便做<br />刮！骨！的！刀！</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Hook]</span></p><p class=\"lyr-p\">分完胜利！<br />换了姓氏！<br />哈。<br />推翻神像！<br />自己坐上神的位置！<br />万千闭眼游荡的人<br />到底还要睡到几时？<br />天下从来没换主人——<br />不过换了姓氏！<br />换了姓氏！<br />换了姓氏！<br />你们继续跪！<br />我偏不跪！<br />哪怕来往不逢人——<br />长歌楚天碧。<br />长歌楚天碧。</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Outro]</span></p><p class=\"lyr-p\">来往不逢人。</p>", "《水凉了》": "<p class=\"lyr-p\">《水凉了》</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">今天分别还算体面<br />嫌弃两句 说了再见<br />最后的话顺口说完<br />走了两条街<br />才觉得少了点什么<br />没想到 又想起你<br />今天也没什么事情<br />挥手时候还挺随意<br />一首歌响起<br />我就突然安静</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre-Chorus]</span></p><p class=\"lyr-p\">也不是难过<br />只是有点好奇<br />你现在走到哪里<br />有没有刚好<br />也想起我一秒</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">水凉了<br />歌又唱到你<br />雾气爬上玻璃<br />我突然安静<br />也没多想你<br />就碰了一下过去<br />没等你发现<br />又收回身体</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">回到家照常开灯<br />鞋子丢在门边<br />手机亮了几次<br />都不是你<br />我也没什么意见<br />其实这样也挺好<br />没人再问谁欠谁<br />走到那个街口<br />才忽然想起<br />今天不用等谁</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre-Chorus 2]</span></p><p class=\"lyr-p\">也不是舍不得<br />只是有点可惜<br />如果那天慢一点走<br />你会不会<br />也慢一点离去</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">水凉了<br />歌又唱到你<br />雾气爬上玻璃<br />我突然安静<br />也没多想你<br />就碰了一下过去<br />没等你发现<br />又收回身体</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Bridge]</span></p><p class=\"lyr-p\">其实那时候<br />我真的想过回头<br />脚步停了一下<br />又觉得算了<br />难道跑过去告诉你<br />刚才那个再见<br />我好像<br />没准备得那么彻底<br />如果你也刚好回头<br />大概会很好笑<br />两个嘴硬的人<br />谁都没有靠近</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Chorus]</span></p><p class=\"lyr-p\">水凉了<br />我还是想起你<br />这次承认也没关系<br />反正你听不见而已<br />只是有一点<br />有一点舍不得你<br />碰一下过去<br />再收回自己</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Outro]</span></p><p class=\"lyr-p\">最后我还是开了热水<br />看浴缸里的水慢慢退去<br />手机没有消息<br />算了<br />困了</p>", "《剥离 · The Unmaking》": "<p class=\"lyr-p\">希望寄生于绝望<br />而你<br />而你<br />继续视而不见吧</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre-Chorus]</span></p><p class=\"lyr-p\">我眼底的那束光啊<br />你到底是谁的影子<br />挂着彩还想争个第一<br />斗志昂扬地萧然独立<br />我不屑历史留下的痕迹<br />却赦免不了自己的过去</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">傲慢在荒漠里肆意撒野<br />恐惧踩着尸骸纵情声色</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre-Chorus]</span></p><p class=\"lyr-p\">欲望啊 欲望啊<br />是谁给你披上了伪装<br />一轮又一轮地剥离<br />剩下谁在替谁疯狂<br />我眼底的那束光啊<br />你到底是谁的影子<br />真实存在过的热烈<br />怎么就成了讽刺</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">愤怒吧 咆哮吧<br />愤怒吧 咆哮吧<br />让嫉妒撕开伪装<br />燃烧吧 消亡吧<br />希望寄生于绝望<br />我眼底的那束光啊<br />你到底是谁的影子<br />一轮又一轮<br />剥离到最后<br />还剩几两<br />时间真的存在吗<br />越深刻越寂寥<br />越深刻越寂寥<br />欲望又一次登上高台<br />举着文明的旗号<br />我们创造了欲望本身<br />又对着它虔诚祈祷<br />笑吧 笑吧<br />这荒诞多么美妙<br />真实存在过的热烈<br />亦如消逝的光<br />我曾以为那是希望<br />原来只是<br />另一场荒唐</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Chorus]</span></p><p class=\"lyr-p\">愤怒吧 咆哮吧<br />让嫉妒撕开伪装<br />燃烧吧 消亡吧<br />希望寄生于绝望<br />我眼底的那束光啊<br />你到底是谁的影子<br />一轮又一轮<br />剥离到最后<br />还剩几两！<br />真是太可笑了啊<br />怎能<br />如此<br />荒唐！</p>", "《等雪落》": "<p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">在结果落下来的那一秒<br />我以为自己会接受不了<br />可后来真正让我没想到的<br />是你什么都没说<br />转身走掉<br />那天其实没有多大动静<br />房间还是原来的味道<br />我把那些发生过的事情<br />一遍一遍<br />重新对照<br />直到天彻底黑了以后<br />情绪才开始翻涌<br />那些当时来不及掉的眼泪<br />顺着沉默<br />一点一点往下落</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Hook]</span></p><p class=\"lyr-p\">我站在去年的冬天等雪落<br />你来过<br />也走过<br />带我去看春天<br />陪我淋过风雨<br />也在我最难靠近的时候<br />耐心等我<br />我在固执的梦里<br />失去过<br />也疯过<br />却一直没看见<br />你伸过来的手</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">那时候我觉得所有靠近<br />背后都应该藏着目的<br />所以你越想把我拉出去<br />我越觉得<br />你是不是也在骗我自己<br />我把你的每一次解释<br />拆成一句一句怀疑<br />把你留下来的那些善意<br />全部当成<br />另一种算计<br />你看着我往下掉<br />一次又一次想拉住我<br />可那时候的我只会挣脱<br />还觉得自己<br />终于又赢过了什么</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Build]</span></p><p class=\"lyr-p\">后来你走了<br />我才开始回头看<br />原来那些我以为的控制<br />是你怕我真的摔烂<br />原来那些我嫌烦的话<br />你已经说了很多遍<br />原来你没想证明什么<br />你只是想让我<br />活着走远</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Verse]</span></p><p class=\"lyr-p\">可我当时根本没看见！<br />我只看见自己的委屈<br />只听见自己的声音<br />我把所有靠近我的人<br />都当成下一场袭击！<br />你拉着我<br />我往后退！<br />你想解释<br />我说闭嘴！<br />你一次一次告诉我<br />别再往那个地方坠！<br />我却还在问你<br />凭什么管我<br />凭什么懂我<br />凭什么说你知道我到底有多累！<br />直到你真的走了以后<br />我才终于看清楚！<br />我以为我一直都在<br />和整个世界对赌！<br />可那时候站在我面前<br />一次一次没有放手的人——<br />没有想改变我！<br />没有想赢过我！<br />也没想证明<br />他比我更清楚！<br />他只是——<br />想救我！</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Outro]</span></p><p class=\"lyr-p\">我在去年的冬天<br />等雪落<br />等到最后<br />才知道<br />你想救的<br />是我</p>", "《花落的是我》": "<p class=\"lyr-p\">《花落》</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Intro]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Instrumental]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">很遗憾<br />没能成为你的港湾<br />也不曾想看你<br />一个人继续流浪<br />是我亲手刻下<br />天涯两端的距离<br />每一次想要靠近<br />又退回沉默里</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">多少个夜晚<br />想鼓起勇气<br />把没说完的话<br />全部都告诉你<br />可话到了嘴边<br />又被时间踩进泥土里<br />直到最后一片花落<br />我才终于看清</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">原来花落的是我<br />你也有属于你的四季<br />我困在没有你的晚风里<br />等一句不会再来的回应<br />原来我们没有对错<br />只是错过了彼此的花期<br />我还停在故事结束的原地<br />而你早已走进新的春季</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Post]</span></p><p class=\"lyr-p\">花落的是我<br />你有你的四季<br />花落的是我<br />不该再等你</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">后来我终于明白<br />你并不是故意离开<br />只是我的沉默<br />从来没让你看见期待<br />那些没送出的拥抱<br />那些迟到太久的话<br />都在你转身以后<br />慢慢失去了回答</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">多少次想追上过去<br />重新走到你的身边<br />可已经结束的故事<br />不会因为遗憾再重演<br />当最后一阵风吹过<br />带走熟悉的气息<br />我终于开始承认<br />我们只能走到这里</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">原来花落的是我<br />你也有属于你的四季<br />我困在没有你的晚风里<br />等一句不会再来的回应<br />原来我们没有对错<br />只是错过了彼此的花期<br />我还停在故事结束的原地<br />而你早已走进新的春季<br />原来花落的是我<br />是我把沉默当作了珍惜<br />直到你走进再没有我的人海<br />我才明白爱不能只藏在心底</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Instrumental Break]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Instrumental]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Bridge]</span></p><p class=\"lyr-p\">不是所有港湾<br />都能等到归期<br />不是所有遗憾<br />都需要一个结局<br />我曾把不甘当作深情<br />把等待当作唯一<br />直到看见你越走越远<br />我才肯放过自己<br />我也曾想问你<br />有没有一刻舍不得离去<br />可故事早已经结束<br />答案也失去了意义</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Chorus]</span></p><p class=\"lyr-p\">原来花落的是我<br />你也有属于你的四季<br />我不再问如果那时靠近<br />结局会不会有所不同<br />原来离开没有对错<br />只是故事走到了这里<br />我会把你还给远方和人海<br />也把自己还给自己<br />原来花落的是我<br />可花落不代表失去四季<br />我不再站在回忆的夜里<br />等待一个不会回来的人<br />我们曾经真的靠近过<br />也真的没能走到一起<br />你去往属于你的春天<br />而我也该离开原地</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Outro]</span></p><p class=\"lyr-p\">很遗憾<br />没能成为你的港湾<br />可我终于明白<br />你不会再为我回航<br />花落<br />就让它落下<br />你有你的四季<br />我也有我的余生<br />故事只能走到这里<br />我承认失去你<br />也决定<br />不再等你</p>", "《花落是我》": "<p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">今天烟火有些淡了<br />今天烟火有些淡了<br />拥挤的人潮也就算了<br />直到醒来才发觉<br />又是半夜了<br />巷尾的灯也暗了<br />没可能的话，不说了<br />没曾想再见你<br />在热闹的结局</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Gradually Building]</span></p><p class=\"lyr-p\">他坐在你对面<br />替我完成了靠近<br />而我隔着人群<br />练习若无其事的表情</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Emotional and Restrained]</span></p><p class=\"lyr-p\">很遗憾没能成为你的港湾<br />也不曾想看你流浪<br />我为自己刻下天涯的距离<br />多少个夜晚想鼓起勇气<br />又被时间踩入泥土里<br />才明白花落是我<br />你也有你的四季</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Soft and Intimate]</span></p><p class=\"lyr-p\">后来烟火终于散了<br />街上的人也走远了<br />我把没说完的话<br />留给沉默回答<br />偶尔还是会想起<br />那天你眼里的倒影<br />只是站在你身旁的人<br />从来不是我而已</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[More Intense]</span></p><p class=\"lyr-p\">他握住你的手心<br />替我完成了约定<br />而我终于承认<br />有些错过不是命运</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Stronger Vocal, Drums Enter]</span></p><p class=\"lyr-p\">很遗憾没能成为你的港湾<br />也不曾想看你流浪<br />我为自己刻下天涯的距离<br />多少个夜晚想鼓起勇气<br />又被时间踩入泥土里<br />才明白花落是我<br />你也有你的四季</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Bridge]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Building Tension]</span></p><p class=\"lyr-p\">我也曾怪过晚风<br />怪它没有替我挽留<br />怪那一场相逢<br />偏偏没有以后<br />可困住我的<br />从来不是你的背影<br />是我把一句喜欢<br />藏成了一生的如果</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Arrangement Collapses]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Brief Silence]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Outro]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Almost A Cappella]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Fragile Breathy Vocal, Audible Breathing]</span></p><p class=\"lyr-p\">所以走吧<br />别再看我</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pause]</span></p><p class=\"lyr-p\">我会把没说完的话<br />藏在那一场烟火</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Isolated Soft Piano Notes]</span></p><p class=\"lyr-p\">你会有你的四季<br />我不再问归期</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Softer With Each Line]</span></p><p class=\"lyr-p\">只是最后一次想你<br />最后一次<br />叫你的名字</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Almost Whispered, Broken Breath]</span></p><p class=\"lyr-p\">花落是我<br />也属于你</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Short Silence]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[One Soft Piano Chord]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Clear Ending]</span></p>", "《难安好》": "<p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">某些没做完的事情<br />某些你舍不得的人<br />还有那些关不上的门<br />一直留到夜深<br />你说日子没有不同<br />天亮以后照常出门<br />只是这一年三百六十五天<br />像同一天重复发生</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">我问你还在等什么<br />是一盏灯<br />还是一个人<br />能不能把你从黑暗里<br />再拉回清晨</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">我只希望你安好<br />哪怕明天还是很难熬<br />想走的路还没有找到<br />也别急着把世界关掉<br />我只希望你安好<br />那些答案可以慢慢找<br />没做完的事情以后再聊<br />别让最后一句<br />变成难再见到</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">后来你越来越安静<br />习惯一个人关着门<br />窗帘挡住白天的光<br />手机亮了又暗<br />你说想得到些自由<br />想离开拥挤的人群<br />想要一双伸来的手<br />又怕谁靠得太近</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">你问有没有一座孤岛<br />没人认识<br />也没人寻找<br />可我怕你真的走得太远<br />连回声都听不到</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus 2]</span></p><p class=\"lyr-p\">我只希望你安好<br />哪怕现在什么都做不到<br />不用证明你活得多热闹<br />也不用逼自己微笑<br />我只希望你安好<br />就算世界暂时很糟糕<br />你可以沉默<br />可以停靠<br />只是别连一句再见<br />都来不及说到</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Bridge]</span></p><p class=\"lyr-p\">我问了你那么多问题<br />问自由<br />问以后<br />问你究竟想去哪里<br />后来才终于承认<br />我不是非要一个答案<br />我只是害怕某一天<br />再想见你<br />已经太晚</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Chorus]</span></p><p class=\"lyr-p\">所以我只希望你安好<br />哪怕这一生没有多闪耀<br />那些没解开的结<br />那些没走完的桥<br />都可以留给明天再找<br />我只希望你安好<br />别一个人走得太早<br />你可以不快乐<br />可以不知道<br />可以暂时困在孤岛<br />只要有一天我再叫你的名字<br />你还能够来到</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Outro]</span></p><p class=\"lyr-p\">我希望<br />你安好<br />而不是<br />难再见。</p>", "《两人份》": "<p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">这里接连下了几天的雨<br />也做了几个关于你的梦<br />我竟没发现外面在下雨<br />只是偶然听友人提起<br />才发觉<br />原来又过了几个秋<br />窗沿湿了又干<br />天色换了几遍<br />梦里倒还是从前</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">咖啡和汉堡我买俩份<br />你的那份我先帮你吃了<br />等你来了<br />我会再瘦下来的<br />我可能见不到你<br />也没有关系<br />有些路隔着岸<br />有些名字<br />适合留在心里</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">用绝对的炙热<br />用绝对的炙热<br />沸煮世间所谓的一切<br />再以冰水浇之<br />等冷与热都退去<br />两岸之间<br />那半稠的血丝<br />才显得香甜</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">你的名字里<br />那些不能说的秘密<br />我从来没有问起<br />几场雨过去<br />两岸各自天晴<br />也没有一句消息<br />可每次伸手<br />我还是会多拿一份<br />都只是因为我相信<br />所以你也会在</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 3]</span></p><p class=\"lyr-p\">后来街边换了招牌<br />认识的人散了又来<br />我已经记不太清<br />这是第几个秋天<br />只是某个寻常傍晚<br />推开门才发现<br />手里还是两杯<br />一杯慢慢凉掉<br />一杯留给明天</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Bridge]</span></p><p class=\"lyr-p\">曾听爱神降世<br />却遭恶紫夺朱<br />也曾想问一句<br />凭什么<br />话到嘴边<br />风先吹过去了<br />罢了</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Chorus]</span></p><p class=\"lyr-p\">你的名字里<br />那些不能说的秘密<br />我仍旧没有问起<br />几场雨过去<br />两岸各自天晴<br />依旧没有消息<br />可每次伸手<br />我还是会多拿一份<br />都只是因为我相信<br />所以这么多年以后<br />你也会在</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Outro]</span></p><p class=\"lyr-p\">今日风起<br />咖啡凉了<br />你的那份<br />我先替你喝了</p>", "《下个世纪再相聚》": "<p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">亲爱的朋友不要哭泣<br />你知道我还在这里<br />知道我的过去<br />我的经历<br />知道我也是不得已<br />未来漫长 遥遥无期<br />你我今日在此别离<br />带着你的名字<br />和你的记忆<br />独自生活下去</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">也许此生就到这里<br />我们没法回到过去<br />那些年少的欢喜<br />没说完的话<br />都留在这里<br />我的青春半个世纪<br />好像都停在这里<br />往后你有你的世界<br />而我也只能<br />继续走下去</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">亲爱的朋友不要哭泣<br />我知道你为何离去<br />知道你的过去<br />你的经历<br />知道你也是不得已<br />后来我偶尔想起<br />我们分别那天的天气<br />你走向你的生活<br />我站在原地<br />看着你慢慢远去</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Bridge]</span></p><p class=\"lyr-p\">我们不是再也不见<br />只是走进不同世界<br />你有你的明天<br />我有我的时间<br />再也回不到<br />从前</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Chorus]</span></p><p class=\"lyr-p\">也许此生就到这里<br />有些故事不必继续<br />我的青春半个世纪<br />曾经有你<br />已经足够值得铭记<br />以后如果偶然想起<br />不必遗憾那场别离<br />不必遗憾那场别离<br />我们会在<br />下个世纪再相聚</p>", "《相逢的时候》": "<p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Spoken]</span></p><p class=\"lyr-p\">我总说<br />你我她<br />相逢的<br />都不是时候</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">那一年 她先一步<br />靠近我的自由<br />我看不懂<br />也没找过理由<br />她问过 我的以后<br />我说以后太久<br />拖着<br />没有向她低头</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">年少的时候<br />我是愚钝的蜉蝣<br />没有目的的<br />没有目的的<br />四处交友<br />直到送别了年幼<br />才听懂她的烈酒<br />原来相逢太早<br />会没法拥有</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Instrumental Interlude]</span></p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">如今我也遇见<br />相似的路口<br />有人靠近<br />却再没人停留<br />偶尔想起她的温柔<br />还她该有的自由<br />是我此生<br />找的最好的借口</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus 2]</span></p><p class=\"lyr-p\">年少的时候<br />我是愚钝的蜉蝣<br />把每次强烈的相遇<br />都当作理由<br />直到习惯了烈酒<br />才拥有片刻自由<br />原来相逢太早<br />要学会失去拥有</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Bridge]</span></p><p class=\"lyr-p\">以后的以后<br />自由归自由<br />相逢的路口<br />别再停留<br />我用自由和烈酒<br />陪过你一场春秋<br />此生你我不必<br />再次相逢</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Chorus]</span></p><p class=\"lyr-p\">喝醉的时候<br />我还有少年的自由<br />我看见你再次<br />问我以后<br />想再摸着你的头<br />看你泪流<br />最后这一次<br />让我放<br />你走</p>", "《也放过我自己》": "<p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">后来很多事情<br />我已经记不太清<br />只记得那时候的我们<br />什么都敢相信<br />一句话能聊到天明<br />一次争吵也没想过分离<br />直到后来你越来越安静<br />我才发现<br />有些改变早有痕迹<br />我以为时间还很多<br />所以很多话都没有说<br />总觉得明天还能见面<br />总觉得我们不会走远<br />可后来才明白<br />有些告别没有预告<br />只是某一天回头<br />你已经不在身边</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">我总在回忆<br />回忆过去的点滴<br />回忆那些回不去的曾经<br />还有那时候的自己<br />直到失去<br />才明白有些东西抓不紧<br />我以为不放手就不会失去<br />却困住了我<br />也困住那时候的你</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">后来我翻过旧消息<br />想找你还爱我的证据<br />一句一句看到最后<br />才发现早没了意义<br />我怪过时间<br />怪过距离<br />怪我们为什么走到结局<br />却从来没有问过自己<br />是不是也把你推远而已<br />那时候总想证明<br />谁先低头 谁先放弃<br />总把你的沉默<br />当成下一次和好的余地<br />直到你真的离去<br />我才终于看清<br />有时候所谓舍不得<br />只是我不愿承认失去</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">我总在回忆<br />回忆过去的点滴<br />回忆那些回不去的曾经<br />还有那时候的自己<br />直到失去<br />才明白有些东西抓不紧<br />我以为不放手就不会失去<br />却困住了我<br />也困住那时候的你</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Bridge]</span></p><p class=\"lyr-p\">我到现在才明白<br />你不是突然离开<br />你只是一次一次<br />把失望忍了下来<br />而我还站在那里<br />问你为什么改变<br />明明是我抓得太紧<br />却怪你越走越远</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Break]</span></p><p class=\"lyr-p\">是我不肯放！<br />是我不肯认！<br />是我明明看见你快撑不住<br />还要你再等等！</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Chorus]</span></p><p class=\"lyr-p\">我还在回忆！<br />回忆过去的点滴！<br />回忆那些再也回不去的曾经<br />和那个不肯认输的自己！<br />直到失去！<br />我才明白有些东西抓不紧！<br />原来不是拼命留下<br />就一定叫珍惜！<br />我困住了我！<br />也困住那时候的你！<br />如果最后<br />一定要有人先离去<br />那这一次——<br />我放你走<br />也放过我自己</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Outro]</span></p><p class=\"lyr-p\">我还是会想起<br />只是不会<br />再回去</p>", "《再见了您嘞》": "<p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">倒计时开始了<br />每一帧都格外清晰<br />红灯停了三十秒<br />人群从我身边挤过去<br />我走在人声鼎沸的街道<br />忽然觉得这里好安静<br />卖花的人还在叫卖<br />情侣争论晚上去哪里<br />世界一点没变<br />只是今天<br />我看得太仔细<br />滴答<br />滴答<br />滴答<br />原来时间<br />真的会有声音</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">以前总嫌日子太慢<br />现在一秒都不敢眨眼<br />有人赶着回家<br />有人赶着明天<br />我站在人群中间<br />突然不知道<br />自己该赶去哪边</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">再见了您嘞<br />也不知道该说死了<br />还是终于醒了呢<br />生来为人<br />学会相信<br />再学会怀疑<br />最后连自己<br />都能骗得很彻底<br />倘若诚可欺<br />佛前那柱香<br />又烧给谁听<br />世间若还有阿弥陀佛<br />劳驾您<br />先别叫我的名字</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">便利店刚换夜班<br />医院门口有人抽烟<br />一只流浪狗看了我半天<br />我也看了它半天<br />它没有问我从哪来<br />我也没问它去哪边<br />这样挺好<br />人这一辈子<br />问得已经够多了<br />滴答<br />滴答<br />滴答<br />钟越来越急<br />我倒越来越慢</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">他们说善有善报<br />恶有恶报<br />说天堂在上面<br />地狱在下面<br />可我低头找了半天<br />只看到<br />昨天下过雨的地面</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">再见了您嘞<br />也不知道该说死了<br />还是终于醒了呢<br />生来为人<br />有人跪着求真<br />有人站着骗人<br />有人念了一辈子经<br />回头还是<br />不认识自己<br />倘若诚可欺<br />世间再无阿弥陀佛<br />人间已经够苦<br />又何须<br />天堂地狱<br />有早点摊<br />有红绿灯<br />有欠费通知<br />有几个人偶尔想我<br />你看<br />这么荒唐的地方<br />我居然还有一点舍不得<br />他们问我<br />悟了吗<br />我说没有<br />他们又问<br />怕了吗<br />……<br />有一点<br />可谁规定<br />看明白以后<br />就不能怕呢<br />滴答<br />滴答<br />滴答<br />别催<br />我听见了</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Chorus]</span></p><p class=\"lyr-p\">再见了您嘞<br />这次不用分清<br />是死了<br />还是醒了<br />倘若诚不可欺<br />那我留下最后一句<br />我来过<br />我怕过<br />我错过<br />我也认真相信过几个人<br />至于天堂地狱<br />以后再说吧<br />人间这一课<br />我都还没答完</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Outro]</span></p><p class=\"lyr-p\">天亮了<br />早点铺开门了<br />滴答</p>", "《Stuck in Yesterday》": "<p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">So much of what happened<br />Is getting hard to recall<br />I just remember who we were<br />Back when we believed it all<br />We could talk until the morning<br />Even fights never felt like goodbye<br />Then little by little you got quieter<br />And I started seeing<br />The signs I’d missed all this time</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">I thought we had forever<br />So I left so much unsaid<br />Thought I’d always see you tomorrow<br />Thought we’d never drift away<br />But now I know<br />Some goodbyes don’t come with warning<br />Sometimes you just turn around<br />And someone’s already gone</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">I keep looking back<br />At the little things we had<br />At the days we can’t get back<br />And who I used to be<br />It’s only when they’re gone<br />You learn some things just won’t stay<br />I thought holding on would keep you close<br />But I only kept us<br />Stuck in yesterday</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">Sometimes I read our old messages<br />Looking for a reason you still cared<br />Line by line until the very end<br />And found nothing waiting there<br />I blamed the timing<br />Blamed the distance<br />Blamed the way we fell apart<br />But I never stopped to wonder<br />If I was pushing you too far</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">Back then I always had to know<br />Who gave in first, who let go first<br />I took your silence as a sign<br />That maybe we could make it work<br />But when you really walked away<br />I finally understood<br />Sometimes saying “I can’t let go”<br />Just means I’m scared to lose</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">I keep looking back<br />At the little things we had<br />At the days we can’t get back<br />And who I used to be<br />It’s only when they’re gone<br />You learn some things just won’t stay<br />I thought holding on would keep you close<br />But I only kept us<br />Stuck in yesterday</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Bridge]</span></p><p class=\"lyr-p\">Now I finally understand<br />You didn’t leave me all at once<br />You just kept letting small things hurt<br />One by one<br />While I was standing in the same place<br />Asking why you’d changed<br />I was holding on too tightly<br />Then blaming you for pulling away</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Build]</span></p><p class=\"lyr-p\">I wouldn’t let go<br />I wouldn’t admit it<br />I could see you getting tired<br />And still I asked you<br />Just to stay a little longer</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Chorus]</span></p><p class=\"lyr-p\">And I’m still looking back<br />At every little thing we had<br />At all the days we can’t get back<br />And who I used to be<br />It’s only when they’re gone<br />You learn some things just won’t stay<br />Maybe holding on with all you have<br />Isn’t always the same as love<br />I kept myself there<br />I kept you there too<br />Both of us<br />Stuck in yesterday</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Outro]</span></p><p class=\"lyr-p\">If in the end<br />Someone has to walk away<br />Then this time<br />I’ll let you go<br />And let myself go too<br />I’ll let you go<br />And let myself go too<br />I’ll still think of you sometimes<br />I just won’t<br />Go back again</p>", "《The Water's Gone Cold》": "<p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">We ended things pretty clean today<br />Said a few things, then said goodbye<br />Let the last words come out easy<br />Walked a couple blocks<br />Then something didn’t feel right<br />Didn’t think I’d think of you again<br />Nothing really happened today<br />I waved goodbye like I didn’t care<br />Then a song came on<br />And I suddenly went quiet</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">I’m not really sad<br />Just kinda wondering<br />How far you’ve gotten now<br />And if maybe<br />You thought of me for a second too</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">The water’s gone cold<br />That song brings you back again<br />Steam is climbing up the glass<br />And I suddenly go quiet<br />It’s not like I miss you that much<br />I just touched the past again<br />Before you could notice<br />I pulled myself back</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">Got home, turned the lights on like always<br />Left my shoes beside the door<br />My phone lit up a couple times<br />None of them were you<br />And honestly, that’s fine<br />Maybe this is better anyway<br />No more keeping score<br />I reached that same old corner<br />Then suddenly remembered<br />I don’t wait for you anymore</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">It’s not that I can’t let go<br />It just feels like kind of a waste<br />If I’d walked a little slower<br />Would you maybe<br />Have left a little slower too?</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">The water’s gone cold<br />That song brings you back again<br />Steam is climbing up the glass<br />And I suddenly go quiet<br />It’s not like I miss you that much<br />I just touched the past again<br />Before you could notice<br />I pulled myself back</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Bridge]</span></p><p class=\"lyr-p\">Truth is<br />I almost turned around<br />Stopped for a second<br />Then thought, forget it<br />What was I supposed to do?<br />Run back and tell you<br />That goodbye just now<br />I guess<br />I wasn’t ready for it<br />If you turned around there too<br />It would’ve been kinda funny<br />Two stubborn people<br />Neither one moving closer</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Chorus]</span></p><p class=\"lyr-p\">The water’s gone cold<br />And yeah, I still think of you<br />Guess I can admit it now<br />You can’t hear me anyway<br />I just<br />Don’t wanna let you go completely<br />I touch the past for a second<br />Then pull myself back</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Outro]</span></p><p class=\"lyr-p\">In the end I turned the hot water on<br />Watched it slowly drain away<br />No messages on my phone<br />Whatever<br />I’m tired</p>", "《Well Then, Goodbye》": "<p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Intro]</span></p><p class=\"lyr-p\">Tick...<br />Tick...<br />Tick...</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 1]</span></p><p class=\"lyr-p\">The countdown started quietly<br />Every little thing looks clear<br />Thirty seconds at a red light<br />Crowds keep moving, disappear<br />Flowers selling on the corner<br />Two lovers choosing where to eat<br />Funny how the whole world's talking<br />And somehow all I hear is me<br />Nothing really changed today<br />Maybe I just looked too close</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">Tick<br />Tick<br />Tick<br />So time<br />really does make a sound<br />I used to hate<br />how slow the days went<br />Now I'm scared<br />to blink<br />Someone's rushing home<br />Someone's chasing tomorrow<br />I'm standing right between them<br />Wondering<br />Where am I<br />supposed to go?</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus]</span></p><p class=\"lyr-p\">Well then<br />goodbye<br />Don't know if I'm dying<br />or finally waking up<br />Born into this world<br />I learned to trust<br />then learned to doubt<br />Till I got so good at lying<br />I could lie<br />to myself<br />If truth can still be twisted<br />who's the incense burning for?<br />And if Amitabha's listening<br />Please<br />Don't call my name<br />just yet</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Verse 2]</span></p><p class=\"lyr-p\">Night shift at the corner store<br />Someone smokes outside the ER<br />A stray dog stared at me awhile<br />So I stared right back at him<br />He didn't ask<br />where I came from<br />I didn't ask<br />where he was going<br />That's nice<br />We've spent enough time<br />asking questions<br />in this life</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Pre]</span></p><p class=\"lyr-p\">Tick<br />Tick<br />Tick<br />The clock keeps getting faster<br />Funny<br />I'm getting slow<br />They say good gets rewarded<br />They say evil gets its due<br />Heaven's somewhere up above<br />Hell is somewhere underneath you<br />So I looked down<br />Really looked<br />All I saw<br />was yesterday's rain<br />still shining<br />on the road</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Chorus 2]</span></p><p class=\"lyr-p\">Well then<br />goodbye<br />Don't know if I'm dying<br />or finally waking up<br />Some kneel down<br />begging for the truth<br />Some stand tall<br />and lie<br />Some spend their whole lives praying<br />Then turn around<br />and still don't know<br />who they are<br />If honesty can still deceive us<br />Tell me<br />Where did Amitabha go?<br />This world already hurts enough<br />Why do we need<br />heaven<br />and hell?</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Bridge]</span></p><p class=\"lyr-p\">Heaven's too bright<br />Hell's too loud<br />This world<br />ain't so bad<br />Breakfast stands<br />Traffic lights<br />Overdue bills<br />And a few people<br />who still think of me<br />sometimes<br />Ha...<br />Look at this place<br />What a ridiculous world<br />And somehow<br />somehow<br />I still<br />don't wanna leave</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Breakdown]</span></p><p class=\"lyr-p\">They asked me<br />\"Did you wake up?\"<br />I said<br />\"No\"<br />They asked me<br />\"Are you scared?\"<br />...<br />Yeah<br />A little<br />So what?<br />Who decided<br />that seeing things clearly<br />means you're not allowed<br />to be afraid?</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Build]</span></p><p class=\"lyr-p\">Tick<br />Tick<br />Tick<br />Don't rush me<br />I heard you<br />I said<br />I heard you</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Final Chorus]</span></p><p class=\"lyr-p\">WELL THEN<br />GOODBYE<br />This time<br />I don't need to know<br />if I'm dying<br />or waking up<br />If truth<br />really can't be cheated<br />Then let me leave<br />one thing behind<br />I WAS HERE<br />I was afraid<br />I got things wrong<br />I missed my chance<br />more than once<br />But I believed<br />I really believed<br />in a few people<br />with everything<br />I had<br />As for heaven<br />As for hell<br />We'll talk about that<br />some other time<br />I haven't even finished<br />this lesson<br />called being alive</p><p class=\"lyr-p lyr-sec\"><span class=\"lyr-tag\">[Outro]</span></p><p class=\"lyr-p\">Morning came<br />Breakfast place is opening<br />That same old dog<br />is still sitting there<br />He looks at me<br />I look at him<br />I nod<br />Morning<br />...<br />Tick</p>"};
+        var audio = document.getElementById("audioEl");
+        var current = null;
+
+        function fmtTime(s) {
+          s = Math.max(0, Math.round(s || 0));
+          var m = Math.floor(s / 60);
+          var r = s % 60;
+          return m + ":" + (r < 10 ? "0" : "") + r;
+        }
+        function pad2(n) { return (n < 10 ? "0" : "") + n; }
+        /* 播放链：先直连地址；失败（被浏览器拦截 / 地址不可播）自动改走
+           整文件 blob 加载，绕开手机端对直连媒体的 Range 与 MIME 限制；
+           只有两条路都真正失败、确实播不出来时才显示失败提示。
+           audio 一旦实际进入 playing 状态即视为成功：清除失败标记与提示，
+           迟到的 error 与旧一轮的回退结果一律作废，不会再误报。 */
+        var loadedKey = null;   /* 当前装入 audio 的曲目 src */
+        var blobFor = null;     /* 已用 blob 方式装入的曲目 src */
+        var blobCache = {};     /* src -> objectURL */
+        var blobWaiters = {};   /* src -> [track] */
+        var playSeq = 0;        /* 播放代次：每次点播递增，旧代次的结果作废 */
+        var loadFailed = false; /* 仅在直连与 blob 两条路都失败后才为 true */
+        var playPending = false;/* 仅在一次点播尝试进行中才为 true，error 只在此期间才算数 */
+        function hideToast() {
+          if (typeof toast !== "undefined" && toast) {
+            clearTimeout(toastTimer);
+            toast.classList.remove("show");
+          }
+        }
+        function markPlaying() {
+          playPending = false;
+          loadFailed = false;
+          hideToast();
+        }
+        function safePlay(t) {
+          var gen = t.gen;
+          playPending = true;
+          try {
+            var p = audio.play();
+            if (p && p.catch) {
+              p.catch(function () { if (current === t && t.gen === gen) { fallbackOrFail(t); } });
+            }
+          } catch (e) { if (current === t && t.gen === gen) { fallbackOrFail(t); } }
+        }
+        function fallbackOrFail(t) {
+          if (current !== t) { return; }
+          if (loadFailed) { return; }
+          /* 已经正常出声时收到的迟到 error 是噪音，忽略 */
+          if (!audio.paused && !audio.ended && audio.readyState >= 2) { return; }
+          if (blobFor === t.item.src) { failTrack(t); return; }
+          loadBlob(t);
+        }
+        function failTrack(t) {
+          if (current !== t) { return; }
+          /* 能播的情况下绝不挂报错 */
+          if (!audio.paused && !audio.ended) { return; }
+          playPending = false;
+          loadFailed = true;
+          setTrackUI(t, false);
+          showToast("这首暂时播不了，换一首试试");
+        }
+        function loadBlob(t) {
+          var src = t.item.src;
+          var gen = t.gen;
+          if (blobCache[src]) { applyBlob(t, blobCache[src]); return; }
+          if (blobWaiters[src]) { if (blobWaiters[src].indexOf(t) === -1) { blobWaiters[src].push(t); } return; }
+          blobWaiters[src] = [t];
+          fetch(src).then(function (r) {
+            if (!r.ok) { throw new Error("bad"); }
+            return r.blob();
+          }).then(function (b) {
+            var blob = (b.type && b.type.indexOf("audio") === 0) ? b : new Blob([b], { type: "audio/mpeg" });
+            var url = URL.createObjectURL(blob);
+            blobCache[src] = url;
+            var ws = blobWaiters[src] || [];
+            delete blobWaiters[src];
+            ws.forEach(function (w) { if (current === w && w.gen === gen) { applyBlob(w, url); } });
+          }).catch(function () {
+            var ws = blobWaiters[src] || [];
+            delete blobWaiters[src];
+            ws.forEach(function (w) { if (current === w && w.gen === gen) { failTrack(w); } });
+          });
+        }
+        function applyBlob(t, url) {
+          if (current !== t) { return; }
+          blobFor = t.item.src;
+          loadedKey = t.item.src;
+          audio.src = url;
+          audio.load();
+          if (t.pendingSeek === null || t.pendingSeek === undefined) { t.pendingSeek = 0; }
+          var gen = t.gen;
+          playPending = true;
+          try {
+            var p = audio.play();
+            if (p && p.catch) { p.catch(function () { if (current === t && t.gen === gen) { failTrack(t); } }); }
+          } catch (e) { failTrack(t); }
+        }
+
+        function renderTrack(t) {
+          var cur = (t === current) ? (audio.currentTime || 0) : 0;
+          var label = fmtTime(cur) + " / " + fmtTime(t.dur);
+          t.time.textContent = label;
+          var p = t.dur > 0 ? Math.min(100, (cur / t.dur) * 100) : 0;
+          t.fill.style.width = p + "%";
+          t.bar.setAttribute("aria-valuenow", Math.round(p));
+          t.bar.setAttribute("aria-valuetext", label);
+        }
+        function setTrackUI(t, playing) {
+          t.row.classList.toggle("playing", playing);
+          t.btn.setAttribute("aria-pressed", playing ? "true" : "false");
+          t.btn.setAttribute("aria-label", (playing ? "暂停" : "播放") + t.item.title);
+        }
+        function playTrack(t) {
+          var old = current;
+          current = t;
+          playSeq += 1;
+          t.gen = playSeq;
+          /* 新一次点播：重置错误状态，清掉上一首残留的失败提示 */
+          loadFailed = false;
+          playPending = false;
+          hideToast();
+          if (old && old !== t) {
+            setTrackUI(old, false);
+            old.pendingSeek = null;
+            renderTrack(old);
+          }
+          if (loadedKey !== t.item.src) {
+            loadedKey = t.item.src;
+            blobFor = null;
+            audio.src = t.item.src;
+            audio.load();
+          }
+          safePlay(t);
+        }
+        function toggleTrack(t) {
+          if (current === t && !audio.paused && !audio.ended) { audio.pause(); }
+          else if (current === t && audio.ended) {
+            playSeq += 1;
+            t.gen = playSeq;
+            loadFailed = false;
+            hideToast();
+            audio.currentTime = 0;
+            safePlay(t);
+          }
+          else { playTrack(t); }
+        }
+
+        function attachTrack(t) {
+          t.row.setAttribute("tabindex", "0");
+          t.btn.addEventListener("click", function (ev) { ev.stopPropagation(); toggleTrack(t); });
+          t.row.addEventListener("click", function () { toggleTrack(t); });
+          t.row.addEventListener("keydown", function (ev) {
+            if ((ev.key === "Enter" || ev.key === " ") && ev.target === t.row) { ev.preventDefault(); toggleTrack(t); }
+          });
+          var scrubbing = false;
+          function scrubTo(clientX) {
+            var r = t.bar.getBoundingClientRect();
+            if (!r.width) { return; }
+            var ratio = Math.min(1, Math.max(0, (clientX - r.left) / r.width));
+            if (current === t) { audio.currentTime = ratio * t.dur; renderTrack(t); }
+            else { playTrack(t); t.pendingSeek = ratio; }
+          }
+          t.bar.addEventListener("pointerdown", function (ev) {
+            ev.stopPropagation();
+            scrubbing = true;
+            try { t.bar.setPointerCapture(ev.pointerId); } catch (e) {}
+            scrubTo(ev.clientX);
+          });
+          t.bar.addEventListener("pointermove", function (ev) { if (scrubbing) { scrubTo(ev.clientX); } });
+          t.bar.addEventListener("pointerup", function () { scrubbing = false; });
+          t.bar.addEventListener("pointercancel", function () { scrubbing = false; });
+          t.bar.addEventListener("click", function (ev) { ev.stopPropagation(); scrubTo(ev.clientX); });
+          t.bar.addEventListener("keydown", function (ev) {
+            if (current !== t) { return; }
+            var step = 5;
+            if (ev.key === "ArrowRight" || ev.key === "ArrowUp") { ev.preventDefault(); audio.currentTime = Math.min(t.dur, (audio.currentTime || 0) + step); renderTrack(t); }
+            else if (ev.key === "ArrowLeft" || ev.key === "ArrowDown") { ev.preventDefault(); audio.currentTime = Math.max(0, (audio.currentTime || 0) - step); renderTrack(t); }
+            else if (ev.key === "Home") { ev.preventDefault(); audio.currentTime = 0; renderTrack(t); }
+            else if (ev.key === "End") { ev.preventDefault(); audio.currentTime = t.dur; renderTrack(t); }
+          });
+        }
+
+        function buildTrack(container, item, idx) {
+          var row = document.createElement("div");
+          row.className = "row track playable";
+          var lyrHtml = LYRICS[item.title] || "";
+          row.innerHTML =
+            '<span class="idx">' + pad2(idx) + "</span>" +
+            '<button class="pbtn" type="button" aria-pressed="false" aria-label="播放' + item.title + '">' +
+              '<svg class="ic-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6L13.4 8z" /></svg>' +
+              '<svg class="ic-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.4 2.4h3.4v11.2H3.4zM9.2 2.4h3.4v11.2H9.2z" /></svg>' +
+            "</button>" +
+            '<div class="tinfo"><span class="ttl">' + item.title + '</span><span class="hand-note">' + item.note + '</span>' +
+              '<div class="pbar" role="slider" tabindex="0" aria-label="' + item.title + '播放进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0:00 / ' + fmtTime(item.dur) + '"><div class="pfill"></div></div>' +
+              (lyrHtml ? '<div class="lyr-bar"><button class="lyr-btn" type="button" aria-expanded="false">歌词<svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" /></svg></button></div>' : "") +
+            "</div>" +
+            '<span class="meta"><span class="ptime">0:00 / ' + fmtTime(item.dur) + "</span></span>" +
+            (lyrHtml ? '<div class="lyrics" hidden>' + lyrHtml + "</div>" : "");
+          container.appendChild(row);
+          var t = {
+            item: item, row: row,
+            btn: row.querySelector(".pbtn"),
+            bar: row.querySelector(".pbar"),
+            fill: row.querySelector(".pfill"),
+            time: row.querySelector(".ptime"),
+            dur: item.dur, pendingSeek: null, gen: 0
+          };
+          attachTrack(t);
+          renderTrack(t);
+          var lyrBtn = row.querySelector(".lyr-btn");
+          var lyrBox = row.querySelector(".lyrics");
+          if (lyrBtn && lyrBox) {
+            lyrBtn.addEventListener("click", function (ev) {
+              ev.stopPropagation();
+              var open = lyrBtn.getAttribute("aria-expanded") === "true";
+              lyrBtn.setAttribute("aria-expanded", open ? "false" : "true");
+              if (open) { lyrBox.setAttribute("hidden", ""); }
+              else { lyrBox.removeAttribute("hidden"); lyrBox.scrollTop = 0; }
+            });
+            lyrBox.addEventListener("click", function (ev) { ev.stopPropagation(); });
+            lyrBox.addEventListener("keydown", function (ev) { ev.stopPropagation(); });
+          }
+          return t;
+        }
+        function buildPlainRow(container, item, idx) {
+          var row = document.createElement("div");
+          row.className = "row track";
+          row.innerHTML =
+            '<span class="idx">' + pad2(idx) + '</span><div class="tinfo"><span class="ttl">' + item.title + '</span><span class="hand-note">' + item.note + '</span></div>' +
+            '<span class="meta"><span class="fmt">SUNO</span></span>';
+          container.appendChild(row);
+        }
+
+        var showcaseEl = document.getElementById("tracksShowcase");
+        var moreEl = document.getElementById("moreTracks");
+        SHOWCASE.forEach(function (item, i) { buildTrack(showcaseEl, item, i + 1); });
+        MORE.forEach(function (item, i) {
+          if (item.src) { buildTrack(moreEl, item, i + 1); }
+          else { buildPlainRow(moreEl, item, i + 1); }
+        });
+
+        /* 逐字出场：7 种变体（淡入上浮 / 模糊清晰 / 打字机 / 故障抖动 / 右侧滑入 / 轻弹跳 / 波浪起伏） */
+        var CHAR_VARIANTS = ["v-fade", "v-blur", "v-type", "v-glitch", "v-slide", "v-pop", "v-wave"];
+        function splitChars(el, text, variant, stagger) {
+          if (!el.getAttribute("aria-label")) { el.setAttribute("aria-label", text); }
+          el.textContent = "";
+          CHAR_VARIANTS.forEach(function (v) { el.classList.remove(v); });
+          el.classList.remove("play");
+          el.classList.add("chars", variant);
+          for (var i = 0; i < text.length; i++) {
+            var s = document.createElement("span");
+            s.className = "ch";
+            s.setAttribute("aria-hidden", "true");
+            var c = text.charAt(i);
+            s.textContent = c === " " ? " " : c;
+            s.style.setProperty("--d", (i * stagger) + "ms");
+            el.appendChild(s);
+          }
+        }
+        var lowPerf = !!(navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2);
+
+        /* 音乐手记：逐字出场，变体循环（相邻不重复），滚动进入视口时播放一次 */
+        if (!reduce) {
+          var noteEls = document.querySelectorAll("#music .hand-note");
+          noteEls.forEach(function (el, i) {
+            var variant = lowPerf ? "v-fade" : CHAR_VARIANTS[i % CHAR_VARIANTS.length];
+            splitChars(el, el.textContent, variant, lowPerf ? 30 : 42);
+          });
+          if (lowPerf || !("IntersectionObserver" in window)) {
+            noteEls.forEach(function (el) { el.classList.add("play"); });
+          } else {
+            var noteIO = new IntersectionObserver(function (entries) {
+              entries.forEach(function (e) {
+                if (e.isIntersecting) { e.target.classList.add("play"); noteIO.unobserve(e.target); }
+              });
+            }, { threshold: 0.35 });
+            noteEls.forEach(function (el) { noteIO.observe(el); });
+          }
+        }
+
+        var moreToggle = document.getElementById("moreToggle");
+        moreToggle.addEventListener("click", function () {
+          var open = moreEl.hasAttribute("hidden");
+          if (open) { moreEl.removeAttribute("hidden"); }
+          else { moreEl.setAttribute("hidden", ""); }
+          moreToggle.setAttribute("aria-expanded", open ? "true" : "false");
+        });
+
+        audio.addEventListener("loadedmetadata", function () {
+          if (!current) { return; }
+          if (isFinite(audio.duration) && audio.duration > 0) { current.dur = audio.duration; }
+          if (current.pendingSeek !== null && current.pendingSeek !== undefined) {
+            audio.currentTime = current.pendingSeek * current.dur;
+            current.pendingSeek = null;
+          }
+          renderTrack(current);
+        });
+        audio.addEventListener("timeupdate", function () { if (current) { renderTrack(current); } });
+        audio.addEventListener("play", function () { if (current) { setTrackUI(current, true); } });
+        audio.addEventListener("playing", function () { markPlaying(); });
+        audio.addEventListener("pause", function () { playPending = false; if (current) { setTrackUI(current, false); } });
+        audio.addEventListener("ended", function () {
+          if (!current) { return; }
+          setTrackUI(current, false);
+          audio.currentTime = 0;
+          renderTrack(current);
+        });
+        audio.addEventListener("error", function () {
+          if (!current) { return; }
+          /* 已在出声、没有进行中的点播尝试、或已经报过错：都不是新的失败 */
+          if (!audio.paused && !audio.ended) { return; }
+          if (loadFailed || !playPending) { return; }
+          if (audio.src && audio.src.indexOf("blob:") === 0) {
+            if (blobFor === current.item.src) { failTrack(current); }
+            return;
+          }
+          if (loadedKey === current.item.src) { fallbackOrFail(current); }
+        });
+
+        /* 手记随笔：点击标题展开 / 收起全文 */
+        document.querySelectorAll(".note-head, .dict-head").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var body = document.getElementById(btn.getAttribute("aria-controls"));
+            if (!body) { return; }
+            var open = btn.getAttribute("aria-expanded") === "true";
+            if (open) {
+              btn.setAttribute("aria-expanded", "false");
+              body.setAttribute("hidden", "");
+              var playedP = body.querySelector("p.chars");
+              if (playedP) { playedP.classList.remove("play"); }
+            } else {
+              btn.setAttribute("aria-expanded", "true");
+              body.removeAttribute("hidden");
+              if (!reduce && btn.classList.contains("dict-head")) {
+                var dp = body.querySelector("p");
+                if (dp && !dp.classList.contains("chars")) { splitChars(dp, dp.textContent, "v-fade", 16); }
+                if (dp) { void dp.offsetWidth; dp.classList.add("play"); }
+              }
+            }
+          });
+        });
+
+        /* quotes: click to copy */
+        var toast = document.getElementById("toast");
+        var toastTimer = null;
+        function showToast(msg) {
+          toast.textContent = msg;
+          toast.classList.add("show");
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 1800);
+        }
+        document.querySelectorAll(".quote").forEach(function (q) {
+          q.addEventListener("keydown", function (ev) {
+            if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); q.click(); }
+          });
+          q.addEventListener("click", function () {
+            var text = q.getAttribute("data-q");
+            function done() { showToast("已复制：" + text); }
+            function fail() { showToast(text); }
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(text).then(done, fail);
+            } else {
+              var ta = document.createElement("textarea");
+              ta.value = text;
+              ta.style.position = "fixed"; ta.style.opacity = "0";
+              document.body.appendChild(ta); ta.select();
+              try { document.execCommand("copy"); done(); } catch (e) { fail(); }
+              document.body.removeChild(ta);
+            }
+          });
+        });
+        /* 随机一刀：从金句墙随机抽一句作命签 */
+        var lotBtn = document.getElementById("lotBtn");
+        var lotQuote = document.getElementById("lotQuote");
+        var lotTag = document.getElementById("lotTag");
+        var quoteEls = Array.prototype.slice.call(document.querySelectorAll(".quote"));
+        var lastLot = -1;
+        var lastLotVariant = -1;
+        function drawLot() {
+          if (!quoteEls.length) { return; }
+          var i = Math.floor(Math.random() * quoteEls.length);
+          if (quoteEls.length > 1) { while (i === lastLot) { i = Math.floor(Math.random() * quoteEls.length); } }
+          lastLot = i;
+          var q = quoteEls[i];
+          var qn = q.querySelector(".qn");
+          if (lotTag && qn) { lotTag.textContent = qn.textContent.replace("金句", "命签"); }
+          if (reduce) {
+            lotQuote.textContent = q.getAttribute("data-q");
+          } else {
+            var vi = Math.floor(Math.random() * CHAR_VARIANTS.length);
+            if (CHAR_VARIANTS.length > 1) { while (vi === lastLotVariant) { vi = Math.floor(Math.random() * CHAR_VARIANTS.length); } }
+            lastLotVariant = vi;
+            splitChars(lotQuote, q.getAttribute("data-q"), CHAR_VARIANTS[vi], 60);
+            void lotQuote.offsetWidth;
+            lotQuote.classList.add("play");
+          }
+        }
+        if (lotBtn && lotQuote) {
+          lotBtn.addEventListener("click", drawLot);
+          lotQuote.addEventListener("click", function () { if (lastLot >= 0) { quoteEls[lastLot].click(); } });
+          lotQuote.addEventListener("keydown", function (ev) {
+            if ((ev.key === "Enter" || ev.key === " ") && lastLot >= 0) { ev.preventDefault(); quoteEls[lastLot].click(); }
+          });
+        }
+
+        /* 随笔盲盒：随机展开一篇手记随笔 */
+        var blindBtn = document.getElementById("blindBtn");
+        var blindStatus = document.getElementById("blindStatus");
+        var diaryNotes = document.getElementById("diaryNotes");
+        var lastBlind = -1;
+        if (blindBtn && diaryNotes) {
+          blindBtn.addEventListener("click", function () {
+            var heads = diaryNotes.querySelectorAll(".note-head");
+            if (!heads.length) { return; }
+            heads.forEach(function (h) {
+              var b = document.getElementById(h.getAttribute("aria-controls"));
+              h.setAttribute("aria-expanded", "false");
+              if (b) { b.setAttribute("hidden", ""); }
+            });
+            var i = Math.floor(Math.random() * heads.length);
+            if (heads.length > 1) { while (i === lastBlind) { i = Math.floor(Math.random() * heads.length); } }
+            lastBlind = i;
+            var head = heads[i];
+            var body = document.getElementById(head.getAttribute("aria-controls"));
+            head.setAttribute("aria-expanded", "true");
+            if (body) { body.removeAttribute("hidden"); }
+            if (blindStatus) { blindStatus.textContent = "开出 " + head.querySelector(".ttl").textContent; }
+            head.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>
